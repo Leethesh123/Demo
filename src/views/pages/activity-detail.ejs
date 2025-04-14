@@ -1,0 +1,146 @@
+<%- include('../partials/header') %>
+
+<div class="container my-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/activity">Activities</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <%= activity.title %>
+      </li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <% if (activity.image) { %>
+      <img
+        src="<%= activity.image %>"
+        class="img-fluid rounded mb-4"
+        alt="<%= activity.title %>"
+      />
+      <% } %>
+
+      <h1 class="mb-4"><%= activity.title %></h1>
+
+      <div class="mb-4">
+        <span class="badge bg-primary me-2"><%= activity.category %></span>
+        <% if (activity.maxParticipants) { %>
+        <span class="badge bg-info"
+          >Max Participants: <%= activity.maxParticipants %></span
+        >
+        <% } %>
+      </div>
+
+      <div class="mb-4">
+        <p class="lead"><%= activity.description %></p>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Activity Details</h5>
+
+          <ul class="list-unstyled">
+            <% if (activity.schedule) { %>
+            <li class="mb-3">
+              <i class="far fa-clock me-2"></i>
+              <strong>Schedule:</strong><br />
+              <%= activity.schedule %>
+            </li>
+            <% } %> <% if (activity.instructor) { %>
+            <li class="mb-3">
+              <i class="fas fa-user-tie me-2"></i>
+              <strong>Instructor:</strong><br />
+              <%= activity.instructor %>
+            </li>
+            <% } %>
+          </ul>
+
+          <div class="d-grid gap-2">
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#enrollModal"
+            >
+              Enroll Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enrollment Modal -->
+<div
+  class="modal fade"
+  id="enrollModal"
+  tabindex="-1"
+  aria-labelledby="enrollModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="enrollModalLabel">
+          Enroll in <%= activity.title %>
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="enrollmentForm">
+          <div class="mb-3">
+            <label for="studentName" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="studentName" required />
+          </div>
+          <div class="mb-3">
+            <label for="studentEmail" class="form-label">Email address</label>
+            <input
+              type="email"
+              class="form-control"
+              id="studentEmail"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="studentGrade" class="form-label">Grade/Class</label>
+            <input
+              type="text"
+              class="form-control"
+              id="studentGrade"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="parentContact" class="form-label"
+              >Parent's Contact Number</label
+            >
+            <input
+              type="tel"
+              class="form-control"
+              id="parentContact"
+              required
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" form="enrollmentForm" class="btn btn-primary">
+          Submit Enrollment
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

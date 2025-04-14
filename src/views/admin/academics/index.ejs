@@ -1,0 +1,633 @@
+<%- include('../layouts/admin', { title: 'Academics Management', style: '',
+script: '', content: `
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <h3 class="card-title">Academics Management</h3>
+          <a href="/admin/academics/add" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Add Content
+          </a>
+        </div>
+        <div class="card-body">
+          <div id="alert-container"></div>
+
+          <form
+            id="academicsForm"
+            action="/admin/academics/update"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <!-- Main Content Section -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h4>Main Content</h4>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Page Title</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="title"
+                        value="${title || ''}"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Description</label>
+                      <textarea
+                        class="form-control"
+                        name="description"
+                        rows="5"
+                        required
+                      >
+${description || ''}</textarea
+                      >
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Upload New Image</label>
+                      <input
+                        type="file"
+                        class="form-control"
+                        name="image"
+                        accept="image/*"
+                      />
+                      <small class="text-muted"
+                        >Recommended size: 1200x800px. Max file size: 2MB</small
+                      >
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Current Image</label>
+                      <div class="current-image-container">
+                        ${image ? `
+                        <img
+                          src="${image}"
+                          alt="Current Academics Image"
+                          class="img-fluid rounded"
+                          style="max-height: 200px"
+                        />
+                        <div class="mt-2">
+                          <a
+                            href="${image}"
+                            target="_blank"
+                            class="btn btn-sm btn-info"
+                          >
+                            <i class="fas fa-eye me-1"></i>View Full Image
+                          </a>
+                        </div>
+                        ` : `
+                        <div class="alert alert-info">
+                          <i class="fas fa-info-circle me-2"></i>No image
+                          uploaded yet
+                        </div>
+                        `}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Programs Section -->
+            <div class="card mb-4">
+              <div
+                class="card-header d-flex justify-content-between align-items-center"
+              >
+                <h4>Academic Programs</h4>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  onclick="addProgram()"
+                >
+                  <i class="fas fa-plus me-1"></i>Add Program
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="programs-container">
+                  ${programs && programs.length > 0 ? programs.map((program,
+                  index) => `
+                  <div class="program-item card mb-3">
+                    <div class="card-body">
+                      <div
+                        class="d-flex justify-content-between align-items-center mb-3"
+                      >
+                        <h5 class="card-title">Program ${index + 1}</h5>
+                        <button
+                          type="button"
+                          class="btn btn-danger btn-sm remove-program"
+                          data-index="${index}"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Program Title</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="programs[${index}][title]"
+                              value="${program.title || ''}"
+                              required
+                            />
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea
+                              class="form-control"
+                              name="programs[${index}][description]"
+                              rows="3"
+                              required
+                            >
+${program.description || ''}</textarea
+                            >
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Duration</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="programs[${index}][duration]"
+                              value="${program.duration || ''}"
+                              required
+                            />
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Requirements</label>
+                            <textarea
+                              class="form-control"
+                              name="programs[${index}][requirements]"
+                              rows="3"
+                              required
+                            >
+${program.requirements || ''}</textarea
+                            >
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Curriculum</label>
+                            <textarea
+                              class="form-control"
+                              name="programs[${index}][curriculum]"
+                              rows="3"
+                              required
+                            >
+${program.curriculum || ''}</textarea
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  `).join('') : ''}
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-end">
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Content Modal -->
+<div
+  class="modal fade"
+  id="addContentModal"
+  tabindex="-1"
+  aria-labelledby="addContentModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addContentModalLabel">
+          Add Academic Content
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="addContentForm"
+          action="/admin/academics"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <div class="mb-3">
+            <label for="contentTitle" class="form-label">Title</label>
+            <input
+              type="text"
+              class="form-control"
+              id="contentTitle"
+              name="title"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="contentDescription" class="form-label"
+              >Description</label
+            >
+            <textarea
+              class="form-control"
+              id="contentDescription"
+              name="description"
+              rows="4"
+              required
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="contentImage" class="form-label">Image</label>
+            <input
+              type="file"
+              class="form-control"
+              id="contentImage"
+              name="image"
+              accept="image/*"
+              required
+            />
+            <div id="imagePreview" class="mt-2 d-none">
+              <img
+                src=""
+                alt="Preview"
+                class="img-fluid rounded"
+                style="max-height: 200px"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary">Save Content</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+` }) %>
+
+<script>
+  // Image preview for add content modal
+  document
+    .getElementById("contentImage")
+    .addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Image file size should be less than 2MB");
+          e.target.value = "";
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          alert("Please upload a valid image file (JPG, PNG, GIF)");
+          e.target.value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const preview = document.getElementById("imagePreview");
+          preview.classList.remove("d-none");
+          preview.querySelector("img").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+</script>
+
+<script>
+  // Image preview functionality
+  document
+    .querySelector('input[type="file"]')
+    .addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Check file size
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Image file size should be less than 2MB");
+          e.target.value = "";
+          return;
+        }
+
+        // Check file type
+        if (!file.type.startsWith("image/")) {
+          alert("Please upload a valid image file (JPG, PNG, GIF)");
+          e.target.value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const currentImageContainer = document.querySelector(
+            ".current-image-container"
+          );
+          currentImageContainer.innerHTML = `
+        <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+        <div class="mt-2">
+          <small class="text-muted">New image preview</small>
+        </div>
+      `;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+  // Update the image display when the page loads
+  document.addEventListener("DOMContentLoaded", function () {
+    const currentImage = document.querySelector(".current-image-container img");
+    if (currentImage) {
+      currentImage.onerror = function () {
+        this.parentElement.innerHTML = `
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i>Image not found
+        </div>
+      `;
+      };
+    }
+  });
+
+  // Program management functions
+  function addProgram() {
+    const container = document.getElementById("programs-container");
+    const index = container.children.length;
+
+    const programHtml = `
+    <div class="program-item card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title">Program ${index + 1}</h5>
+          <button type="button" class="btn btn-danger btn-sm remove-program" data-index="${index}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Program Title</label>
+              <input type="text" class="form-control" name="programs[${index}][title]" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="programs[${index}][description]" rows="3" required></textarea>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Duration</label>
+              <input type="text" class="form-control" name="programs[${index}][duration]" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Requirements</label>
+              <textarea class="form-control" name="programs[${index}][requirements]" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Curriculum</label>
+              <textarea class="form-control" name="programs[${index}][curriculum]" rows="3" required></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+    container.insertAdjacentHTML("beforeend", programHtml);
+  }
+
+  function removeProgram(index) {
+    const container = document.getElementById("programs-container");
+    const program = container.children[index];
+    if (program) {
+      program.remove();
+      // Update indices for remaining programs
+      const programs = container.getElementsByClassName("program-item");
+      for (let i = 0; i < programs.length; i++) {
+        programs[i].querySelector(".card-title").textContent = `Program ${
+          i + 1
+        }`;
+        const inputs = programs[i].querySelectorAll("input, textarea");
+        inputs.forEach((input) => {
+          const name = input.getAttribute("name");
+          input.setAttribute("name", name.replace(/\[\d+\]/, `[${i}]`));
+        });
+      }
+    }
+  }
+
+  // Form submission handler
+  document
+    .getElementById("academicsForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const alertContainer = document.getElementById("alert-container");
+
+      try {
+        // Collect programs data
+        const programs = [];
+        const programItems = document.querySelectorAll(".program-item");
+
+        programItems.forEach((item, index) => {
+          const title = item.querySelector('[name$="[title]"]')?.value || "";
+          const description =
+            item.querySelector('[name$="[description]"]')?.value || "";
+          const duration =
+            item.querySelector('[name$="[duration]"]')?.value || "";
+          const requirements =
+            item.querySelector('[name$="[requirements]"]')?.value || "";
+          const curriculum =
+            item.querySelector('[name$="[curriculum]"]')?.value || "";
+
+          if (title || description || duration || requirements || curriculum) {
+            programs.push({
+              title,
+              description,
+              duration,
+              requirements,
+              curriculum,
+            });
+          }
+        });
+
+        // Add programs data to formData
+        formData.append("programs", JSON.stringify(programs));
+
+        // Show loading state
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      Saving...
+    `;
+
+        const response = await fetch("/admin/academics/update", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        // Clear previous alerts
+        alertContainer.innerHTML = "";
+
+        if (response.ok && data.success) {
+          // Show success message
+          const alert = document.createElement("div");
+          alert.className = "alert alert-success alert-dismissible fade show";
+          alert.innerHTML = `
+        <i class="fas fa-check-circle me-2"></i>${data.message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+          alertContainer.appendChild(alert);
+
+          // Update form data if provided
+          if (data.data) {
+            document.querySelector('[name="title"]').value = data.data.title;
+            document.querySelector('[name="description"]').value =
+              data.data.description;
+
+            // Update image preview if new image was uploaded
+            if (data.data.image) {
+              const currentImageContainer = document.querySelector(
+                ".current-image-container"
+              );
+              currentImageContainer.innerHTML = `
+            <img src="${data.data.image}" alt="Academics Image" class="img-fluid rounded" style="max-height: 300px;">
+            <div class="mt-2">
+              <small class="text-muted">Current image</small>
+            </div>
+          `;
+            }
+
+            // Update programs if they were modified
+            if (data.data.programs && data.data.programs.length > 0) {
+              const programsContainer =
+                document.getElementById("programs-container");
+              programsContainer.innerHTML = data.data.programs
+                .map(
+                  (program, index) => `
+            <div class="program-item card mb-3">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="card-title">${
+                    program.title || `Program ${index + 1}`
+                  }</h5>
+                  <button type="button" class="btn btn-danger btn-sm remove-program" data-index="${index}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Program Title</label>
+                      <input type="text" class="form-control" name="programs[${index}][title]" value="${
+                    program.title || ""
+                  }" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Description</label>
+                      <textarea class="form-control" name="programs[${index}][description]" rows="3" required>${
+                    program.description || ""
+                  }</textarea>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Duration</label>
+                      <input type="text" class="form-control" name="programs[${index}][duration]" value="${
+                    program.duration || ""
+                  }" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Requirements</label>
+                      <textarea class="form-control" name="programs[${index}][requirements]" rows="3" required>${
+                    program.requirements || ""
+                  }</textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Curriculum</label>
+                      <textarea class="form-control" name="programs[${index}][curriculum]" rows="3" required>${
+                    program.curriculum || ""
+                  }</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          `
+                )
+                .join("");
+            }
+          }
+
+          // Reload the page after 2 seconds
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          // Show error message
+          const alert = document.createElement("div");
+          alert.className = "alert alert-danger alert-dismissible fade show";
+          alert.innerHTML = `
+        <i class="fas fa-exclamation-circle me-2"></i>${
+          data.message || data.error
+        }
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+          alertContainer.appendChild(alert);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alertContainer.innerHTML = `
+      <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>An unexpected error occurred. Please try again.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+      } finally {
+        // Reset button state
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+      }
+    });
+</script>
+
+<%- include('../layouts/admin-footer') %>

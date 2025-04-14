@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/header') %>
+  <link rel="stylesheet" href="/css/home.css" />
+
+  <body>
+    <!-- Banner Carousel -->
+    <div
+      id="homeBanner"
+      class="carousel slide home-banner"
+      data-bs-ride="carousel"
+    >
+      <div class="carousel-indicators">
+        <% homeContent.bannerSlides.forEach((slide, index) => { %>
+        <button
+          type="button"
+          data-bs-target="#homeBanner"
+          data-bs-slide-to="<%= index %>"
+          class="<%= index === 0 ? 'active' : '' %>"
+        ></button>
+        <% }) %>
+      </div>
+
+      <div class="carousel-inner">
+        <% homeContent.bannerSlides.forEach((slide, index) => { %>
+        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+          <img
+            src="<%= slide.imageUrl %>"
+            class="d-block w-100"
+            alt="<%= slide.title %>"
+          />
+          <div class="carousel-caption">
+            <h3><%= slide.title %></h3>
+            <% if (slide.subtitle) { %>
+            <p class="lead"><%= slide.subtitle %></p>
+            <% } %> <% if (slide.ctaText) { %>
+            <a href="<%= slide.ctaLink || '#' %>" class="btn btn-primary mt-3">
+              <%= slide.ctaText %>
+            </a>
+            <% } %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <button
+        class="carousel-control-prev"
+        type="button"
+        data-bs-target="#homeBanner"
+        data-bs-slide="prev"
+      >
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#homeBanner"
+        data-bs-slide="next"
+      >
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+
+    <!-- Welcome Section -->
+    <section class="welcome-section py-5">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <h2 class="display-4 mb-4"><%= homeContent.welcomeTitle %></h2>
+            <p class="lead"><%= homeContent.welcomeContent %></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Sections -->
+    <% if (homeContent.featuredSections && homeContent.featuredSections.length >
+    0) { %>
+    <section class="container my-5">
+      <div class="row">
+        <% homeContent.featuredSections.forEach(section => { %>
+        <div class="col-md-4 mb-4">
+          <div class="card feature-card h-100">
+            <div class="card-body text-center p-4">
+              <% if (section.icon) { %>
+              <i class="<%= section.icon %> feature-icon"></i>
+              <% } %>
+              <h3 class="h4"><%= section.title %></h3>
+              <p class="text-muted"><%= section.content %></p>
+              <% if (section.link) { %>
+              <a href="<%= section.link %>" class="btn btn-outline-primary"
+                >Learn More</a
+              >
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %> <%- include('../partials/footer') %>
+  </body>
+</html>

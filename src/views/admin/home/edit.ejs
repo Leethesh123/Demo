@@ -1,0 +1,126 @@
+<%- include('../layouts/admin', { 
+  title: 'Edit Home Content',
+  content: `
+    <div class="container mt-4">
+      <h2>Edit Home Content</h2>
+      <form action="/admin/home/update" method="POST" enctype="multipart/form-data">
+        <!-- Banner Slides Section -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Banner Slides</h4>
+          </div>
+          <div class="card-body">
+            <div id="bannerSlides">
+              ${bannerSlides && bannerSlides.length > 0 ? bannerSlides.map((slide, index) => `
+                <div class="banner-slide mb-3">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label">Image</label>
+                        <input type="file" class="form-control" name="bannerSlides[${index}][image]" accept="image/*">
+                        ${slide.imageUrl ? `
+                          <img src="${slide.imageUrl}" class="img-thumbnail mt-2" style="max-height: 100px;">
+                        ` : ''}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" name="bannerSlides[${index}][title]" value="${slide.title || ''}">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Subtitle</label>
+                        <input type="text" class="form-control" name="bannerSlides[${index}][subtitle]" value="${slide.subtitle || ''}">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">CTA Text</label>
+                        <input type="text" class="form-control" name="bannerSlides[${index}][ctaText]" value="${slide.ctaText || ''}">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">CTA Link</label>
+                        <input type="text" class="form-control" name="bannerSlides[${index}][ctaLink]" value="${slide.ctaLink || ''}">
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-danger btn-sm" onclick="removeBannerSlide(this)">Remove</button>
+                </div>
+              `).join('') : ''}
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addBannerSlide()">Add Banner Slide</button>
+          </div>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Welcome Section</h4>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Welcome Title</label>
+              <input type="text" class="form-control" name="welcomeTitle" value="${welcomeTitle || ''}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Welcome Content</label>
+              <textarea class="form-control" name="welcomeContent" rows="5" required>${welcomeContent || ''}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Featured Sections -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Featured Sections</h4>
+          </div>
+          <div class="card-body">
+            <div id="featuredSections">
+              ${featuredSections && featuredSections.length > 0 ? featuredSections.map((section, index) => `
+                <div class="featured-section mb-3">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" name="featuredSections[${index}][title]" value="${section.title || ''}">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Content</label>
+                        <textarea class="form-control" name="featuredSections[${index}][content]" rows="3">${section.content || ''}</textarea>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label">Icon</label>
+                        <input type="text" class="form-control" name="featuredSections[${index}][icon]" value="${section.icon || ''}">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Link</label>
+                        <input type="text" class="form-control" name="featuredSections[${index}][link]" value="${section.link || ''}">
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-danger btn-sm" onclick="removeFeaturedSection(this)">Remove</button>
+                </div>
+              `).join('') : ''}
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addFeaturedSection()">Add Featured Section</button>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  `
+}) %>

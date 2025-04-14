@@ -1,0 +1,119 @@
+<%- include('../partials/header') %>
+
+<div class="container py-5">
+  <!-- Academic Content Section -->
+  <% content.forEach(section => { %>
+  <div class="row mb-5 align-items-center">
+    <div class="col-md-6 <%= section.image ? '' : 'order-md-2' %>">
+      <h2 class="mb-4"><%= section.title %></h2>
+      <p class="lead"><%= section.description %></p>
+    </div>
+    <% if (section.image) { %>
+    <div class="col-md-6">
+      <img
+        src="<%= section.image %>"
+        alt="<%= section.title %>"
+        class="img-fluid rounded shadow-lg"
+      />
+    </div>
+    <% } %>
+  </div>
+  <% }) %>
+
+  <!-- Academic Programs Section -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="text-center mb-5">Our Academic Programs</h2>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <% programs.forEach(program => { %>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm hover-shadow transition-300">
+        <% if (program.image) { %>
+        <img
+          src="<%= program.image %>"
+          class="card-img-top"
+          alt="<%= program.title %>"
+        />
+        <% } else { %>
+        <div class="card-img-top bg-light text-center py-5">
+          <i class="fas fa-graduation-cap fa-4x text-muted"></i>
+        </div>
+        <% } %>
+        <div class="card-body">
+          <h5 class="card-title"><%= program.title %></h5>
+          <p class="card-text text-muted">
+            <small>
+              <i class="fas fa-clock me-1"></i> Duration: <%= program.duration
+              %>
+              <br />
+              <i class="fas fa-graduation-cap me-1"></i> Level: <%=
+              program.level %>
+            </small>
+          </p>
+          <p class="card-text">
+            <%= program.description.substring(0, 150) %>...
+          </p>
+          <button
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#programModal<%= program._id %>"
+          >
+            Learn More
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for program details -->
+    <div
+      class="modal fade"
+      id="programModal<%= program._id %>"
+      tabindex="-1"
+      aria-labelledby="programModalLabel<%= program._id %>"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="programModalLabel<%= program._id %>">
+              <%= program.title %>
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <% if (program.image) { %>
+                <img
+                  src="/uploads/<%= program.image %>"
+                  class="img-fluid rounded"
+                  alt="<%= program.title %>"
+                />
+                <% } %>
+              </div>
+              <div class="col-md-6">
+                <h6>Duration</h6>
+                <p><%= program.duration %></p>
+                <h6>Level</h6>
+                <p><%= program.level %></p>
+                <h6>Description</h6>
+                <p><%= program.description %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
