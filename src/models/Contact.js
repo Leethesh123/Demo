@@ -1,6 +1,12 @@
 const mongoose = require("mongoose");
 
 const contactSchema = new mongoose.Schema({
+  socialLinks: {
+    facebook: String,
+    twitter: String,
+    instagram: String,
+    linkedin: String,
+  },
   latitude: {
     type: Number,
     required: true,

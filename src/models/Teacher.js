@@ -6,6 +6,14 @@ const teacherSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    experience: {
+      type: String,
+      trim: true,
+    },
+    bio: {
+      type: String,
+      trim: true,
+    },
     firstName: {
       type: String,
       required: true,
@@ -38,6 +46,10 @@ const teacherSchema = new mongoose.Schema(
     specialization: {
       type: String,
       trim: true,
+    },
+    achievements: {
+      type: [String],
+      default: [],
     },
     joiningDate: {
       type: Date,

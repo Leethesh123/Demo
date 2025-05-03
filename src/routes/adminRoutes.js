@@ -15,7 +15,7 @@ const Teacher = require("../models/Teacher");
 const Course = require("../models/Course");
 // const Class = require("../models/");
 const Activity = require("../models/Activity");
-const Academic = require("../models/Academic");
+const AcademicProgram = require("../models/AcademicProgram");
 const fs = require("fs");
 // Multer setup for image uploads
 // const storage = multer.diskStorage({
@@ -68,9 +68,7 @@ router.post("/login", async (req, res) => {
       return;
     }
 
-    const token = jwt.sign({ userId: admin._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = await admin.generateAuthToken();
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -90,6 +88,7 @@ router.post("/login", async (req, res) => {
 // Protected admin dashboard
 
 router.get("/dashboard", auth, async (req, res) => {
+  console.log(req.body);
   try {
     // Fetch all necessary data in parallel
     const [students, teachers, courses, activities] = await Promise.all([
@@ -378,7 +377,7 @@ router.get("/about/edit", auth, async (req, res) => {
         mission: "",
         visionTitle: "Our Vision",
         vision: "",
-        historyTitle: "Our History",
+        historyTitle: "Our Inspiration",
         history: "",
         image: "",
       });
@@ -443,7 +442,7 @@ router.post("/about/update", auth, upload.single("image"), async (req, res) => {
       mission: missionContent || "",
       visionTitle: visionTitle || "Our Vision",
       vision: visionContent || "",
-      historyTitle: historyTitle || "Our History",
+      historyTitle: historyTitle || "Our Inspiration",
       history: historyContent || "",
     };
 
@@ -484,140 +483,473 @@ router.post("/about/update", auth, upload.single("image"), async (req, res) => {
 });
 
 // Academics Management Routes
+
 router.get("/academics", auth, async (req, res) => {
   try {
-    const academic = await Academic.findOne();
+    // Fetch all academic programs
+    const programs = await AcademicProgram.find().sort({ createdAt: -1 });
+
+    // Pass success and error from query params or null
+    const success = req.query.success || null;
+    const error = req.query.error || null;
+
+    // Render the page with programs and messages
     res.render("admin/academics/index", {
-      title: academic?.title || "Our Academics",
-      description: academic?.description || "",
-      image: academic?.image || "",
-      programs: academic?.programs || [],
+      programs,
+      success,
+      error,
       admin: req.admin,
+      title: "Academic Programs Management",
     });
   } catch (error) {
-    console.error("Error loading academics content:", error);
+    console.error("Error loading academic programs:", error);
     res.status(500).render("admin/academics/index", {
-      error: "Failed to load academics content",
-      title: "Our Academics",
-      description: "",
-      image: "",
       programs: [],
+      error: "Failed to load academic programs",
       admin: req.admin,
+      title: "Academic Programs Management",
     });
   }
 });
 
-// Add the update route handler
+// Delete program route
+router.delete("/academics/delete/:id", auth, async (req, res) => {
+  try {
+    const program = await AcademicProgram.findById(req.params.id);
+    if (!program) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Program not found" });
+    }
+
+    // Delete the program's image if it exists
+    if (program.image) {
+      const imagePath = path.join(__dirname, "..", "public", program.image);
+      try {
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      } catch (err) {
+        console.error("Error deleting program image:", err);
+      }
+    }
+
+    await program.deleteOne();
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting program:", error);
+    res.status(500).json({ success: false, error: "Error deleting program" });
+  }
+});
+
 router.post(
-  "/academics/update",
+  "/admin/academics/update-main",
   auth,
   upload.single("image"),
   async (req, res) => {
     try {
-      const { title, description, programs } = req.body;
+      const { title, description } = req.body;
+      let mainContent = await AcademicProgram.findOne({ isMainContent: true });
 
-      // Create update data object with default values
-      const updateData = {
-        title: title || "Our Academics",
-        description: description || "",
-        programs: [], // Initialize empty programs array
-      };
-
-      // Handle programs data if it exists
-      if (programs) {
-        try {
-          const parsedPrograms =
-            typeof programs === "string" ? JSON.parse(programs) : programs;
-          if (Array.isArray(parsedPrograms) && parsedPrograms.length > 0) {
-            updateData.programs = parsedPrograms.map((program) => ({
-              title: program.title || "",
-              description: program.description || "",
-              duration: program.duration || "",
-              requirements: program.requirements || "",
-              curriculum: program.curriculum || "",
-            }));
-          }
-        } catch (error) {
-          console.error("Error parsing programs data:", error);
-          // Continue with empty programs array
-        }
-      }
-
-      // Handle file upload
-      if (req.file) {
-        if (!req.file.mimetype.startsWith("image/")) {
-          return res.status(400).json({
-            success: false,
-            error: "Invalid file type",
-            message: "Please upload a valid image file (JPG, PNG, GIF)",
-          });
-        }
-
-        // Check file size (max 2MB)
-        if (req.file.size > 2 * 1024 * 1024) {
-          return res.status(400).json({
-            success: false,
-            error: "File too large",
-            message: "Image file size should be less than 2MB",
-          });
-        }
-
-        updateData.image = `/uploads/${req.file.filename}`;
-      }
-
-      // Find existing academic document or create new one
-      let academic = await Academic.findOne();
-      if (!academic) {
-        academic = new Academic(updateData);
+      if (!mainContent) {
+        mainContent = new AcademicProgram({
+          title,
+          description,
+          isMainContent: true,
+        });
       } else {
-        // If new image is uploaded, delete the old one
-        if (req.file && academic.image) {
+        mainContent.title = title;
+        mainContent.description = description;
+      }
+
+      // Handle image upload
+      if (req.file) {
+        // Delete old image if exists
+        if (mainContent.image) {
           const oldImagePath = path.join(
             __dirname,
             "..",
             "public",
-            academic.image
+            mainContent.image
+          );
+          try {
+            if (fs.existsSync(oldImagePath)) {
+              fs.unlinkSync(oldImagePath);
+            }
+          } catch (err) {
+            console.error("Error deleting old image:", err);
+          }
+        }
+        mainContent.image = `/uploads/${req.file.filename}`;
+      }
+
+      await mainContent.save();
+      res.send("success", "Academic content updated successfully");
+      return res.redirect("/admin/academics");
+    } catch (error) {
+      console.error("Error updating academic content:", error);
+      res.send("error", "Error updating academic content");
+      return res.redirect("/admin/academics");
+    }
+  }
+);
+
+// Edit program route
+
+router.get("/academics/edit/:id", auth, async (req, res) => {
+  try {
+    const program = await AcademicProgram.findById(req.params.id);
+    if (!program) {
+      // Redirect with error query param
+      return res.redirect("/admin/academics?error=Academic program not found");
+    }
+
+    // Pass success and error from query params or null
+    const success = req.query.success || null;
+    const error = req.query.error || null;
+
+    res.render("admin/academics/edit", {
+      program,
+      success,
+      error,
+      admin: req.admin,
+      title: "Edit Academic Program",
+    });
+  } catch (error) {
+    console.error("Error loading program for edit:", error);
+    return res.redirect(
+      "/admin/academics?error=Error loading academic program"
+    );
+  }
+});
+
+// Update program
+// Update program
+router.post(
+  "/academics/edit/:id",
+  auth,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      console.log("Received edit request for program ID:", req.params.id);
+      console.log("Request body:", req.body);
+
+      const { title, description, duration, requirements, curriculum, level } =
+        req.body;
+
+      // Find the academic program by ID
+      const academicProgram = await AcademicProgram.findById(req.params.id);
+      if (!academicProgram) {
+        return res.status(404).json({
+          success: false,
+          error: "Academic program not found",
+        });
+      }
+
+      // Handle image upload
+      if (req.file) {
+        // Validate file type
+        if (!req.file.mimetype.startsWith("image/")) {
+          return res.status(400).json({
+            success: false,
+            error: "Please upload a valid image file",
+          });
+        }
+
+        // Validate file size (2MB limit)
+        if (req.file.size > 2 * 1024 * 1024) {
+          return res.status(400).json({
+            success: false,
+            error: "Image file size should be less than 2MB",
+          });
+        }
+
+        // Delete old image if it exists
+        if (academicProgram.image) {
+          const oldImagePath = path.join(
+            __dirname,
+            "..",
+            "public",
+            academicProgram.image
+          );
+          try {
+            if (fs.existsSync(oldImagePath)) {
+              fs.unlinkSync(oldImagePath);
+              console.log("Old image deleted successfully");
+            }
+          } catch (err) {
+            console.error("Error deleting old image:", err);
+          }
+        }
+
+        academicProgram.image = `/uploads/${req.file.filename}`;
+      }
+
+      // Update fields
+      academicProgram.title = title || academicProgram.title;
+      academicProgram.description = description || academicProgram.description;
+      academicProgram.duration = duration || academicProgram.duration;
+      academicProgram.level = level || academicProgram.level;
+      academicProgram.requirements =
+        requirements || academicProgram.requirements;
+      academicProgram.curriculum = curriculum || academicProgram.curriculum;
+      academicProgram.isActive = req.body.isActive === "on";
+      academicProgram.updatedAt = new Date();
+
+      // Save the updated document
+      await academicProgram.save();
+      return res.redirect("/admin/academics");
+    } catch (error) {
+      console.error("Error updating academic program:", error);
+      res.redirect(`/admin/academics/index`);
+      return res.status(500).render("admin/academics", {
+        success: false,
+        error: "Failed to update program",
+        message: error.message,
+      });
+    }
+    return res.redirect("/admin/academics");
+  }
+);
+
+// Add new program form route
+
+router.get("/academics/add", auth, (req, res) => {
+  // Pass success and error from query params or null
+  const success = req.query.success || null;
+  const error = req.query.error || null;
+
+  res.render("admin/academics/add", {
+    title: "Add Academic Program",
+    success,
+    error,
+    admin: req.admin,
+  });
+});
+
+// Add new program submission route
+router.post(
+  "/academics/add",
+  auth,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const {
+        title,
+        description,
+        duration,
+        level,
+        requirements,
+        curriculum,
+        isActive,
+      } = req.body;
+
+      // Input validation
+      if (!title || !description || !duration || !level) {
+        res.send(
+          "error",
+          "Title, description, duration and level are required"
+        );
+        return res.redirect("/admin/academics/add");
+      }
+
+      // Create new program
+      const newProgram = new AcademicProgram({
+        title: title.trim(),
+        description: description.trim(),
+        duration: duration.trim(),
+        level: level.trim(),
+        requirements: requirements ? requirements.trim() : "",
+        curriculum: curriculum ? curriculum.trim() : "",
+        isActive: isActive === "on",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Handle image upload
+      if (req.file) {
+        newProgram.image = `/uploads/${req.file.filename}`;
+      }
+
+      // Save the program
+      await newProgram.save();
+
+      res.send("success", "Academic program added successfully");
+      return res.redirect("/admin/academics");
+    } catch (error) {
+      console.error("Error adding program:", error);
+      res.send("error", error.message || "Error adding academic program");
+      return res.redirect("/admin/academics/add");
+    }
+  }
+);
+
+router.get("/academics/sections", auth, async (req, res) => {
+  try {
+    const Content = require("../models/content");
+    console.log("Content:", Content);
+    // Find all academic sections
+    const sections = await Content.find({
+      page: "academics",
+      isActive: true,
+    }).sort({ order: 1 });
+
+    // Log for debugging
+    console.log("Fetched sections:", sections);
+
+    // Get the content for each section
+    // const content = {
+    //   excellence: sections.find((s) => s.title === "Academic Excellence") || {},
+    //   support: sections.find((s) => s.title === "Student Support") || {},
+    //   research:
+    //     sections.find((s) => s.title === "Research Opportunities") || {},
+    // };
+
+    // Pass success and error from query params or null
+    const success = req.query.success || null;
+    const error = req.query.error || null;
+
+    return res.render("admin/academics/sections", {
+      sections,
+      title: "Manage Academic Sections",
+      success,
+      error,
+    });
+  } catch (error) {
+    console.error("Error loading academic sections:", error);
+    // Redirect with error query param
+    return res.redirect(
+      "/admin/academics?error=Error loading academic sections"
+    );
+  }
+});
+
+// Update individual section content
+
+router.post(
+  "/academics/sections/update",
+  auth,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const Content = require("../models/content");
+      const { title, description, order } = req.body;
+
+      let section = await Content.findOne({ page: "academics", order });
+
+      if (!section) {
+        section = new Content({
+          page: "academics",
+          title,
+          description,
+          order,
+          isActive: true,
+        });
+      } else {
+        section.title = title;
+        section.description = description;
+      }
+
+      // Handle new image
+      if (req.file) {
+        // Delete old image if exists
+        if (section.image) {
+          const oldImagePath = path.join(
+            __dirname,
+            "..",
+            "public",
+            section.image
           );
           if (fs.existsSync(oldImagePath)) {
             fs.unlinkSync(oldImagePath);
           }
         }
-        Object.assign(academic, updateData);
+
+        // Save new image path
+        section.image = `/uploads/${req.file.filename}`;
       }
 
-      // Save the document
-      await academic.save();
+      await section.save();
 
-      res.status(200).json({
-        success: true,
-        message: "Academics content updated successfully",
-        data: {
-          title: academic.title,
-          description: academic.description,
-          image: academic.image,
-          programs: academic.programs,
-        },
-      });
+      // Redirect after successful save
+      return res.redirect("/admin/academics/sections");
     } catch (error) {
-      console.error("Error updating academics:", error);
-      res.status(500).json({
-        success: false,
-        error: "Failed to update academics content",
-        message: "Please try again later",
-      });
+      console.error("Error updating academic section:", error);
+
+      // Redirect with error (optionally flash or query param)
+      return res.redirect("/admin/academics/sections");
     }
   }
 );
+// Update academic programs
+router.post("/admin/academics/update/programs", auth, async (req, res) => {
+  try {
+    const { programs } = req.body;
+    let parsedPrograms;
+
+    try {
+      parsedPrograms =
+        typeof programs === "string" ? JSON.parse(programs) : programs;
+      if (!Array.isArray(parsedPrograms)) {
+        parsedPrograms = [parsedPrograms];
+      }
+
+      parsedPrograms = parsedPrograms
+        .filter((program) => program && typeof program === "object")
+        .map((program) => ({
+          title: program.title?.trim() || "",
+          description: program.description?.trim() || "",
+          duration: program.duration?.trim() || "",
+          requirements: program.requirements?.trim() || "",
+          curriculum: program.curriculum?.trim() || "",
+        }))
+        .filter((program) =>
+          Object.values(program).some((value) => value !== "")
+        );
+    } catch (error) {
+      console.error("Error parsing programs data:", error);
+      res.send("error", "Invalid programs data format");
+      return res.redirect("/admin/academics/edit");
+    }
+
+    let academic = await Content.findOne();
+    if (!academic) {
+      academic = new Content();
+    }
+
+    academicProgram = parsedPrograms;
+    academic.updatedAt = new Date();
+    await academic.save();
+
+    return res.json({
+      success: true,
+      message: "Academic programs updated successfully",
+      redirect: "/admin/academics",
+    });
+  } catch (error) {
+    console.error("Error updating academic programs:", error);
+    res.send("error", "Failed to update academic programs");
+    return res.redirect("/admin/academics/edit");
+  }
+});
+
+// Delete academic content
+router.delete("/admin/academics/:id", auth, async (req, res) => {
+  try {
+    await Content.findByIdAndDelete(req.params.id);
+    res.redirect("/admin/academics");
+  } catch (error) {
+    console.error("Error deleting academic content:", error);
+    res.status(500).json({ error: "Error deleting academic content" });
+  }
+});
 
 // Activities Routes
-router.get("/activities", async (req, res) => {
+router.get("/activities", auth, async (req, res) => {
   try {
-    const activity = await Activity.findOne().sort({ createdAt: -1 });
+    const activities = await Activity.find().sort({ createdAt: -1 });
     res.render("admin/activities/index", {
-      title: activity?.title || "",
-      description: activity?.description || "",
-      image: activity?.image || "",
-      activities: activity?.activities || [],
+      activities: activities
     });
   } catch (error) {
     console.error("Error fetching activities:", error);
@@ -629,105 +961,141 @@ router.get("/activities", async (req, res) => {
   }
 });
 
-router.post("/activities/update", upload.single("image"), async (req, res) => {
+// Get single activity for editing
+router.get("/activities/:id", auth, async (req, res) => {
   try {
-    const updateData = {
-      title: req.body.title,
-      description: req.body.description,
-      activities: [],
-    };
-
-    // Parse activities data
-    if (req.body.activities) {
-      try {
-        const activities = JSON.parse(req.body.activities);
-        if (Array.isArray(activities)) {
-          updateData.activities = activities.filter(
-            (activity) =>
-              activity.title &&
-              activity.description &&
-              activity.schedule &&
-              activity.location &&
-              activity.participants
-          );
-        }
-      } catch (error) {
-        console.error("Error parsing activities:", error);
-        return res.status(400).json({
-          success: false,
-          message: "Invalid activities data format",
-        });
-      }
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        message: "Activity not found"
+      });
     }
+    res.json(activity);
+  } catch (error) {
+    console.error("Error fetching activity:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching activity",
+      error: error.message
+    });
+  }
+});
+
+// Create new activity
+router.post("/activities", auth, upload.single("image"), async (req, res) => {
+  try {
+    const { title, description, category, schedule, location, participants } = req.body;
+    
+    const activity = new Activity({
+      title,
+      description,
+      category,
+      schedule,
+      location,
+      participants,
+      isActive: true
+    });
+
+    if (req.file) {
+      activity.image = `/uploads/${req.file.filename}`;
+    }
+
+    await activity.save();
+    res.json({
+      success: true,
+      message: "Activity created successfully",
+      activity
+    });
+  } catch (error) {
+    console.error("Error creating activity:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating activity",
+      error: error.message
+    });
+  }
+});
+
+// Update activity
+router.post("/activities/update/:id", auth, upload.single("image"), async (req, res) => {
+  try {
+    const { title, description, category, schedule, location, participants } = req.body;
+    
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        message: "Activity not found"
+      });
+    }
+
+    // Update fields
+    activity.title = title;
+    activity.description = description;
+    activity.category = category;
+    activity.schedule = schedule;
+    activity.location = location;
+    activity.participants = participants;
 
     // Handle image upload
     if (req.file) {
-      // Validate file type
-      if (!req.file.mimetype.startsWith("image/")) {
-        return res.status(400).json({
-          success: false,
-          message: "Please upload a valid image file",
-        });
-      }
-
-      // Validate file size (2MB limit)
-      if (req.file.size > 2 * 1024 * 1024) {
-        return res.status(400).json({
-          success: false,
-          message: "Image file size should be less than 2MB",
-        });
-      }
-
       // Delete old image if exists
-      const oldActivity = await Activity.findOne().sort({ createdAt: -1 });
-      if (oldActivity && oldActivity.image) {
-        const oldImagePath = path.join(
-          __dirname,
-          "..",
-          "public",
-          oldActivity.image
-        );
+      if (activity.image) {
+        const oldImagePath = path.join(__dirname, "..", "public", activity.image);
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
       }
-
-      // Save new image
-      const imagePath = `/uploads/activities/${Date.now()}-${
-        req.file.originalname
-      }`;
-      const fullPath = path.join(__dirname, "..", "public", imagePath);
-      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-      fs.renameSync(req.file.path, fullPath);
-      updateData.image = imagePath;
-    }
-
-    // Find or create activity document
-    let activity = await Activity.findOne().sort({ createdAt: -1 });
-    if (!activity) {
-      activity = new Activity(updateData);
-    } else {
-      Object.assign(activity, updateData);
+      activity.image = `/uploads/${req.file.filename}`;
     }
 
     await activity.save();
-
     res.json({
       success: true,
-      message: "Activities updated successfully",
-      data: {
-        title: activity.title,
-        description: activity.description,
-        image: activity.image,
-        activities: activity.activities,
-      },
+      message: "Activity updated successfully",
+      activity
     });
   } catch (error) {
-    console.error("Error updating activities:", error);
+    console.error("Error updating activity:", error);
     res.status(500).json({
       success: false,
-      message: "Error updating activities",
-      error: error.message,
+      message: "Error updating activity",
+      error: error.message
+    });
+  }
+});
+
+// Delete activity
+router.delete("/activities/:id", auth, async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        message: "Activity not found"
+      });
+    }
+
+    // Delete the activity image if it exists
+    if (activity.image) {
+      const imagePath = path.join(__dirname, "..", "public", activity.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    await activity.deleteOne();
+    res.json({
+      success: true,
+      message: "Activity deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting activity:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting activity",
+      error: error.message
     });
   }
 });

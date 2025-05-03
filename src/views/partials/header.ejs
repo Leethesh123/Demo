@@ -21,7 +21,12 @@
           <img
             src="<%= logo ? logo.logoUrl : '/uploads/default-logo.png' %>"
             alt="School Logo"
-            style="max-height: 50px; width: auto"
+            style="
+              height: 50px;
+              width: auto;
+              object-fit: contain;
+              max-width: 200px;
+            "
           />
         </a>
         <button
@@ -40,6 +45,9 @@
             <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
             <li class="nav-item">
               <a class="nav-link" href="/about">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/academics">Academic</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/cbse-corner">CBSE Corner</a>

@@ -8,6 +8,8 @@ const mainRoutes = require("./src/routes/mainRoutes");
 const academicProgramRoutes = require("./src/routes/academicProgramRoutes");
 const academicContentRoutes = require("./src/routes/academicContentRoutes");
 const homeContentRoutes = require("./src/routes/homeContentRoutes");
+// const adminHomeContentRoutes = require("./src/routes/admin/homeContent");
+// const adminAdmissionsRoutes = require("./src/routes/admin/admissions");
 const adminRoutes = require("./src/routes/adminRoutes");
 const aboutRoutes = require("./src/routes/aboutRoutes");
 const activityRoutes = require("./src/routes/activityRoutes");
@@ -16,30 +18,40 @@ const teacherRoutes = require("./src/routes/teacherRoutes");
 const galleryRoutes = require("./src/routes/galleryRoutes");
 const contactRoutes = require("./src/routes/contactRoutes");
 const documentRoutes = require("./src/routes/documentRoutes");
+const logoRouter = require("./src/routes/logoRoutes");
 const cors = require("cors");
 const expressLayouts = require("express-ejs-layouts");
 const methodOverride = require("method-override");
+const session = require("express-session");
+const flash = require("connect-flash");
+const adminViewMiddleware = require("./src/middleware/adminView");
+
 require("dotenv").config();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "src/views"));
 
-// Configure express-ejs-layouts
-// app.use(expressLayouts);
-// app.set("layout extractScripts", true);
-// app.set("layout extractStyles", true);
-//   app.set("layout", "layout/admin");
+// Session and flash configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(flash());
 
-// Use admin layout for admin routes
-
-app.use(express.static(path.join(__dirname, "src/public")));
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
 app.use(methodOverride("_method"));
-// Middleware to fetch logo data for all views
+
+// Import models after DB connection
 const Logo = require("./src/models/Logo");
+
+// Middleware to fetch logo data for all views
 app.use(async (req, res, next) => {
   try {
     const logo = await Logo.findOne();
@@ -52,19 +64,23 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Middleware to fetch contact info for all views
+const contactMiddleware = require("./src/middleware/contact");
+app.use(contactMiddleware);
+
+// Admin layout middleware
 app.use("/admin", (req, res, next) => {
-  app.use(expressLayouts);
   app.set("layout", "layout/admin");
   res.locals.layout = "admin/layouts/admin";
   next();
 });
 
+// Admin view middleware
+app.use("/admin", adminRoutes); // Register admin routes first
+app.use("/admin/logo", logoRouter); // Register logo routes under /admin path
 app.use("/", mainRoutes);
 app.use("/about", aboutRoutes);
-app.use("/", academicProgramRoutes);
-app.use("/", academicContentRoutes);
 app.use("/home-content", homeContentRoutes);
-app.use("/admin", adminRoutes);
 app.use("/activities", activityRoutes);
 app.use("/admin/activities", activityRoutes);
 app.use("/", admissionRoutes);
@@ -72,15 +88,18 @@ app.use("/", teacherRoutes);
 app.use("/", galleryRoutes);
 app.use("/contact", contactRoutes);
 app.use("/", documentRoutes);
+app.use("/", require("./src/routes/testimonialRoutes"));
 
+// Database connection
 mongoose
   .connect("mongodb://127.0.0.1:27017/schoolwebsite")
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => {
     console.error("MongoDB connection error:", err);
-    process.exit(1); // Exit process with failure
+    process.exit(1);
   });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on http://localhost:${process.env.PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

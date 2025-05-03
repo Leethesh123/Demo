@@ -16,7 +16,7 @@
     <div class="col-lg-6">
       <div class="card shadow-sm">
         <div class="card-body">
-          <h2 class="h4 mb-3">Our Mission</h2>
+          <h2 class="h4 mb-3"><%= about.missionTitle %></h2>
           <p class="text-muted"><%= about.mission %></p>
         </div>
       </div>
@@ -27,7 +27,7 @@
     <div class="col-lg-6">
       <div class="card shadow-sm h-100">
         <div class="card-body">
-          <h2 class="h4 mb-3">Our Vision</h2>
+          <h2 class="h4 mb-3"><%= about.visionTitle %></h2>
           <p class="text-muted"><%= about.vision %></p>
         </div>
       </div>
@@ -35,7 +35,7 @@
     <div class="col-lg-6">
       <div class="card shadow-sm h-100">
         <div class="card-body">
-          <h2 class="h4 mb-3">Our History</h2>
+          <h2 class="h4 mb-3"><%= about.historyTitle %></h2>
           <p class="text-muted"><%= about.history %></p>
         </div>
       </div>
@@ -45,6 +45,51 @@
   <div class="alert alert-info">
     No about content has been added yet. Please add content through the admin
     panel.
+  </div>
+  <% } %>
+
+  <!-- Testimonials Section -->
+  <% if (testimonials && testimonials.length > 0) { %>
+  <div class="row mt-5">
+    <div class="col-12">
+      <h2 class="text-center mb-4">What People Say About Us</h2>
+      <div class="row g-4">
+        <% testimonials.forEach(testimonial => { %>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <% if (testimonial.image) { %>
+                <img
+                  src="<%= testimonial.image %>"
+                  alt="<%= testimonial.personName %>"
+                  class="rounded-circle me-3"
+                  style="width: 60px; height: 60px; object-fit: cover"
+                />
+                <% } else { %>
+                <div
+                  class="bg-secondary rounded-circle me-3"
+                  style="width: 60px; height: 60px"
+                ></div>
+                <% } %>
+                <div>
+                  <h5 class="card-title mb-0"><%= testimonial.personName %></h5>
+                  <p class="text-muted mb-0"><%= testimonial.designation %></p>
+                </div>
+              </div>
+              <p class="card-text">
+                <% let messageWords = testimonial.message.split(' ');
+                messageWords = messageWords.map(word => { if
+                (testimonial.highlightedWords.includes(word)) { return
+                `<strong>${word}</strong>`; } return word; }); %> <%-
+                messageWords.join(' ') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
   </div>
   <% } %>
 </div>

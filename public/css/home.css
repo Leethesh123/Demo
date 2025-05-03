@@ -1,6 +1,6 @@
 /* Home Page Banner Styles */
 #homeBanner .carousel-item img {
-  height: 400px; /* Set fixed height */
+  height: 600px; /* Set fixed height */
   width: 100%; /* Ensure full width */
   object-fit: cover; /* Maintain aspect ratio */
 }

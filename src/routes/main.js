@@ -5,9 +5,9 @@ const Message = require("../models/message");
 const HomeContent = require("../models/HomeContent");
 const AcademicProgram = require("../models/AcademicProgram");
 const About = require("../models/About");
+const Activity = require("../models/Activity");
 
 router.get("/", async (req, res) => {
-  console.log(res);
   try {
     const [content, homeContent, principal] = await Promise.all([
       Content.findOne(),
@@ -29,8 +29,14 @@ router.get("/", async (req, res) => {
 
 router.get("/about", async (req, res) => {
   try {
-    const about = await About.findOne();
-    res.render("pages/about", { about, title: "About Us" });
+    const {
+      getTestimonialsForAboutPage,
+    } = require("../controllers/testimonialController");
+    const [about, testimonials] = await Promise.all([
+      About.findOne(),
+      getTestimonialsForAboutPage(),
+    ]);
+    res.render("pages/about", { about, testimonials, title: "About Us" });
   } catch (error) {
     console.error("Error loading about page:", error);
     res.status(500).send("Error loading about page");
@@ -41,7 +47,6 @@ router.get("/teachers", async (req, res) => {
   try {
     const Teacher = require("../models/Teacher");
     const teachers = await Teacher.find({ isActive: true });
-    console.log(teachers);
     res.render("pages/teachers", { teachers, title: "Our Teachers" });
   } catch (error) {
     console.error("Error loading teachers page:", error);
@@ -51,18 +56,72 @@ router.get("/teachers", async (req, res) => {
 
 router.get("/academics", async (req, res) => {
   try {
-    const [programs, content] = await Promise.all([
+    console.log("Fetching academic content...");
+
+    const [programs, academics] = await Promise.all([
       AcademicProgram.find({ isActive: true }).sort({ createdAt: -1 }),
       Content.find({ page: "academics", isActive: true }).sort({ order: 1 }),
     ]);
+
     res.render("pages/academics", {
       programs,
-      content,
+      academics,
       title: "Academic Programs",
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error loading academic content:", error);
     res.status(500).send("Error loading academic programs");
+  }
+});
+
+router.get("/academics/:id", async (req, res) => {
+  try {
+    const program = await AcademicProgram.findById(req.params.id);
+    if (!program) {
+      return res.status(404).send("Activity not found");
+    }
+    res.render("pages/academic-detail", {
+      program,
+      title: program.title,
+    });
+  } catch (error) {
+    console.error("Error loading academic:", error);
+    res.status(500).send("Error loading activity details");
+  }
+});
+
+// Add an alias route for /activity/:id
+router.get("/activity/:id", async (req, res) => {
+  try {
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.render("pages/error", {
+        title: "Error",
+        message: "Invalid activity ID format",
+        error: { status: 404 },
+      });
+    }
+
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.render("pages/error", {
+        title: "Error",
+        message: "Activity not found",
+        error: { status: 404 },
+      });
+    }
+
+    res.render("pages/activity-detail", {
+      activity,
+      title: activity.title,
+    });
+  } catch (error) {
+    console.error("Error loading activity:", error);
+    res.render("pages/error", {
+      title: "Error",
+      message: "Error loading activity details",
+      error: { status: 500 },
+    });
   }
 });
 

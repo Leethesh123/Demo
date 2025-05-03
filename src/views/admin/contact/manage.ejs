@@ -55,6 +55,71 @@ ${contact?.address || ''}</textarea
                   />
                 </div>
               </div>
+              <div class="col-12 mt-4">
+                <h4>Social Media Links</h4>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="facebook" class="form-label">Facebook</label>
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fab fa-facebook"></i
+                      ></span>
+                      <input
+                        type="url"
+                        class="form-control"
+                        id="facebook"
+                        name="socialLinks[facebook]"
+                        value="${contact?.socialLinks?.facebook || '#'}"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="twitter" class="form-label">Twitter</label>
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fab fa-twitter"></i
+                      ></span>
+                      <input
+                        type="url"
+                        class="form-control"
+                        id="twitter"
+                        name="socialLinks[twitter]"
+                        value="${contact?.socialLinks?.twitter || '#'}"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="instagram" class="form-label">Instagram</label>
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fab fa-instagram"></i
+                      ></span>
+                      <input
+                        type="url"
+                        class="form-control"
+                        id="instagram"
+                        name="socialLinks[instagram]"
+                        value="${contact?.socialLinks?.instagram || '#'}"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="linkedin" class="form-label">LinkedIn</label>
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fab fa-linkedin"></i
+                      ></span>
+                      <input
+                        type="url"
+                        class="form-control"
+                        id="linkedin"
+                        name="socialLinks[linkedin]"
+                        value="${contact?.socialLinks?.linkedin || '#'}"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="col-md-6 mb-3">
                 <label for="latitude" class="form-label">Latitude</label>
                 <div class="input-group">
@@ -107,12 +172,12 @@ ${contact?.address || ''}</textarea
         <div class="card-header" style="background-color: white; color: black">
           <h3 class="card-title mb-0">Contact Form Submissions</h3>
           <div class="d-flex justify-content-end">
-            <a
+            <!-- <a
               href="/admin/contact/submissions"
               class="btn btn-sm bg-gradient-info"
             >
               <i class="fas fa-external-link-alt me-2"></i>View All Submissions
-            </a>
+            </a> -->
           </div>
         </div>
         <div class="card-body">

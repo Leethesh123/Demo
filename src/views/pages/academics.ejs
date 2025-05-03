@@ -1,26 +1,35 @@
 <%- include('../partials/header') %>
 
+<!-- Academic Sections -->
 <div class="container py-5">
-  <!-- Academic Content Section -->
-  <% content.forEach(section => { %>
-  <div class="row mb-5 align-items-center">
-    <div class="col-md-6 <%= section.image ? '' : 'order-md-2' %>">
-      <h2 class="mb-4"><%= section.title %></h2>
-      <p class="lead"><%= section.description %></p>
+  <h1 class="text-center mb-5">Academics</h1>
+
+  <!-- Display Academic Content -->
+  <% if (academics && academics.length > 0) { %> <% academics.forEach((content,
+  index) => { %>
+  <div
+    class="row align-items-center mb-5 <%= index % 2 !== 0 ? 'flex-lg-row-reverse' : '' %>"
+  >
+    <div class="col-lg-6">
+      <h2 class="mb-4"><%= content.title %></h2>
+      <p class="lead"><%= content.description %></p>
     </div>
-    <% if (section.image) { %>
-    <div class="col-md-6">
-      <img
-        src="<%= section.image %>"
-        alt="<%= section.title %>"
-        class="img-fluid rounded shadow-lg"
-      />
+    <div class="col-lg-6">
+      <% if (content.image) { %>
+      <div class="image-container">
+        <img
+          src="<%= content.image %>"
+          alt="<%= content.title %>"
+          class="img-fluid rounded shadow"
+        />
+      </div>
+      <% } %>
     </div>
-    <% } %>
   </div>
-  <% }) %>
+  <% }); %> <% } %>
 
   <!-- Academic Programs Section -->
+  <% if (programs && programs.length > 0) { %>
   <div class="row mb-5">
     <div class="col-12">
       <h2 class="text-center mb-5">Our Academic Programs</h2>
@@ -31,89 +40,147 @@
     <% programs.forEach(program => { %>
     <div class="col-md-6 col-lg-4">
       <div class="card h-100 shadow-sm hover-shadow transition-300">
-        <% if (program.image) { %>
-        <img
-          src="<%= program.image %>"
-          class="card-img-top"
-          alt="<%= program.title %>"
-        />
-        <% } else { %>
-        <div class="card-img-top bg-light text-center py-5">
-          <i class="fas fa-graduation-cap fa-4x text-muted"></i>
+        <div class="card-img-container">
+          <% if (program.image) { %>
+          <img
+            src="<%= program.image %>"
+            class="card-img-top"
+            alt="<%= program.title %>"
+          />
+          <% } else { %>
+          <div class="card-img-top bg-light text-center py-5">
+            <i class="fas fa-graduation-cap fa-4x text-muted"></i>
+          </div>
+          <% } %>
         </div>
-        <% } %>
         <div class="card-body">
           <h5 class="card-title"><%= program.title %></h5>
           <p class="card-text text-muted">
-            <small>
-              <i class="fas fa-clock me-1"></i> Duration: <%= program.duration
-              %>
-              <br />
-              <i class="fas fa-graduation-cap me-1"></i> Level: <%=
-              program.level %>
-            </small>
+            <% if (program.duration) { %>
+            <small
+              ><i class="fas fa-clock me-1"></i> Duration: <%= program.duration
+              %></small
+            ><br />
+            <% } %>
           </p>
           <p class="card-text">
-            <%= program.description.substring(0, 150) %>...
+            <%= program.description ? program.description.substring(0, 150) +
+            '...' : '' %>
           </p>
-          <button
-            class="btn btn-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#programModal<%= program._id %>"
+          <a href="/academics/<%= program._id %>" class="btn btn-primary"
+            >Learn More</a
           >
-            Learn More
-          </button>
         </div>
       </div>
     </div>
-
-    <!-- Modal for program details -->
-    <div
-      class="modal fade"
-      id="programModal<%= program._id %>"
-      tabindex="-1"
-      aria-labelledby="programModalLabel<%= program._id %>"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="programModalLabel<%= program._id %>">
-              <%= program.title %>
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-6">
-                <% if (program.image) { %>
-                <img
-                  src="/uploads/<%= program.image %>"
-                  class="img-fluid rounded"
-                  alt="<%= program.title %>"
-                />
-                <% } %>
-              </div>
-              <div class="col-md-6">
-                <h6>Duration</h6>
-                <p><%= program.duration %></p>
-                <h6>Level</h6>
-                <p><%= program.level %></p>
-                <h6>Description</h6>
-                <p><%= program.description %></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <% }) %>
+    <% }); %>
   </div>
+  <% } %> <% if (!academics?.length && !programs?.length) { %>
+  <div class="alert alert-info text-center">
+    No academic content available at the moment.
+  </div>
+  <% } %>
 </div>
+
+<!-- Custom CSS -->
+<style>
+  .row {
+    margin-bottom: 4rem;
+  }
+
+  h2 {
+    color: #2c3e50;
+    font-weight: 600;
+  }
+
+  .lead {
+    color: #34495e;
+    line-height: 1.8;
+  }
+
+  /* Image container styles */
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: 400px; /* Fixed height for consistent sizing */
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* This ensures the image covers the container without distortion */
+    object-position: center;
+    transition: transform 0.3s ease;
+  }
+
+  .image-container:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Program card image styles */
+  .card-img-container {
+    position: relative;
+    width: 100%;
+    height: 250px; /* Fixed height for program images */
+    overflow: hidden;
+  }
+
+  .card-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .hover-shadow {
+    transition: box-shadow 0.3s ease;
+  }
+
+  .hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .transition-300 {
+    transition: all 0.3s ease;
+  }
+
+  .card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .row {
+      text-align: center;
+    }
+
+    .col-lg-6 {
+      margin-bottom: 2rem;
+    }
+
+    .image-container {
+      height: 300px; /* Slightly smaller height on mobile */
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .image-container {
+      height: 250px; /* Even smaller height on smaller devices */
+    }
+  }
+</style>
 
 <%- include('../partials/footer') %>

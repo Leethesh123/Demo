@@ -16,13 +16,10 @@ const sampleAboutContent = {
 async function seedAboutContent() {
   try {
     await mongoose.connect(dbConfig.uri, dbConfig.options);
-    console.log("Connected to MongoDB");
 
     await About.deleteMany({});
-    console.log("Cleared existing about content");
 
     await About.create(sampleAboutContent);
-    console.log("Successfully seeded about content data");
 
     await mongoose.disconnect();
     process.exit(0);

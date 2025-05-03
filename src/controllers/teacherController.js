@@ -29,15 +29,41 @@ exports.addTeacher = [
   upload.single("image"),
   async (req, res) => {
     try {
+      if (req.fileValidationError) {
+        return res.status(400).render("admin/teachers/add", {
+          title: "Add New Teacher",
+          error: req.fileValidationError,
+          formData: req.body,
+        });
+      }
+
       const teacherData = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
         phone: req.body.phone,
-        qualification: req.body.qualifications,
+        experience: req.body.experience,
+        qualification: req.body.qualification,
         specialization: req.body.specialization,
+        bio: req.body.bio,
+        achievements: req.body.achievements
+          ? req.body.achievements
+              .split("\n")
+              .filter((achievement) => achievement.trim())
+          : [],
         image: req.file ? `/uploads/${req.file.filename}` : "",
       };
+
+      const existingTeacher = await Teacher.findOne({
+        email: teacherData.email,
+      });
+      if (existingTeacher) {
+        return res.status(400).render("admin/teachers/add", {
+          title: "Add New Teacher",
+          error: "A teacher with this email already exists",
+          formData: req.body,
+        });
+      }
 
       const teacher = new Teacher(teacherData);
       await teacher.save();
@@ -73,24 +99,53 @@ exports.updateTeacher = [
   upload.single("image"),
   async (req, res) => {
     try {
+      if (req.fileValidationError) {
+        const teacher = await Teacher.findById(req.params.id);
+        return res.status(400).render("admin/teachers/edit", {
+          title: "Edit Teacher",
+          error: req.fileValidationError,
+          teacher: { ...teacher.toObject(), ...req.body },
+        });
+      }
+
       const teacherData = {
-        name: req.body.name,
-        subject: req.body.subject,
-        qualifications: req.body.qualifications,
-        experience: req.body.experience,
-        bio: req.body.bio,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         email: req.body.email,
         phone: req.body.phone,
+        experience: req.body.experience,
+        qualification: req.body.qualification,
         specialization: req.body.specialization,
-        achievements: req.body.achievements?.split("\n").filter(Boolean) || [],
-        image: req.body.image,
-        updatedAt: Date.now(),
+        bio: req.body.bio,
+        achievements: req.body.achievements
+          ? req.body.achievements
+              .split("\n")
+              .filter((achievement) => achievement.trim())
+          : [],
       };
+
+      if (req.file) {
+        teacherData.image = `/uploads/${req.file.filename}`;
+      }
+
+      const existingTeacher = await Teacher.findOne({
+        email: teacherData.email,
+        _id: { $ne: req.params.id },
+      });
+
+      if (existingTeacher) {
+        const teacher = await Teacher.findById(req.params.id);
+        return res.status(400).render("admin/teachers/edit", {
+          title: "Edit Teacher",
+          error: "A teacher with this email already exists",
+          teacher: { ...teacher.toObject(), ...req.body },
+        });
+      }
 
       const teacher = await Teacher.findByIdAndUpdate(
         req.params.id,
         teacherData,
-        { new: true }
+        { new: true, runValidators: true }
       );
 
       if (!teacher) {
@@ -100,6 +155,14 @@ exports.updateTeacher = [
       res.redirect("/admin/teachers");
     } catch (error) {
       console.error("Error updating teacher:", error);
+      if (error.name === "ValidationError") {
+        const teacher = await Teacher.findById(req.params.id);
+        return res.status(400).render("admin/teachers/edit", {
+          title: "Edit Teacher",
+          error: error.message,
+          teacher: { ...teacher.toObject(), ...req.body },
+        });
+      }
       res.status(500).send("Error updating teacher");
     }
   },

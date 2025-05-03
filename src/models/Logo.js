@@ -5,10 +5,8 @@ const logoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model("Logo", logoSchema);

@@ -22,7 +22,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-console.log(auth);
+// Logo management routes
+router.use("/logo", auth, require("./logoRoutes"));
+
 // Authentication routes moved to adminRoutes.js
 
 router.get("/dashboard", auth, async (req, res) => {
@@ -67,11 +69,12 @@ router.post("/edit/:id", upload.single("image"), async (req, res) => {
 });
 
 // Logo management routes
-router.get("/logo", async (req, res) => {
-  const logo = await Logo.findOne();
-  res.render("admin/logo/manage", { logo });
-});
+// router.get("/logo", auth, async (req, res) => {
+//   console.log("Logo route accessed");
+//   const logo = await Logo.findOne();
+//   res.render("admin/logo/manage", { logo, admin: req.admin });
+// });
 
-router.post("/logo/update", upload.single("logo"), updateLogo);
+// router.post("/logo/update", auth, upload.single("logo"), updateLogo);
 
 module.exports = router;

@@ -64,7 +64,8 @@ const contactController = {
   // Admin: Update contact information
   updateContactInfo: async (req, res) => {
     try {
-      const { address, phone, email, latitude, longitude } = req.body;
+      const { address, phone, email, latitude, longitude, socialLinks } =
+        req.body;
       let contact = await Contact.findOne();
 
       if (contact) {
@@ -73,6 +74,7 @@ const contactController = {
         contact.email = email;
         contact.latitude = parseFloat(latitude) || 0;
         contact.longitude = parseFloat(longitude) || 0;
+        contact.socialLinks = socialLinks;
       } else {
         contact = new Contact({
           address,

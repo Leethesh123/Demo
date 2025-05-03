@@ -11,6 +11,6 @@ router.get("/admin/teachers/add", teacherController.getAddTeacher);
 router.post("/admin/teachers/add", teacherController.addTeacher);
 router.get("/admin/teachers/edit/:id", teacherController.getEditTeacher);
 router.post("/admin/teachers/edit/:id", teacherController.updateTeacher);
-router.post("/admin/teachers/delete/:id", teacherController.deleteTeacher);
+router.delete("/admin/teachers/delete/:id", teacherController.deleteTeacher);
 
 module.exports = router;

@@ -8,6 +8,21 @@ const documentController = {
   renderUploadForm: async (req, res) => {
     res.render("admin/documents/upload");
   },
+
+  // Render edit form
+  renderEditForm: async (req, res) => {
+    try {
+      const document = await Document.findById(req.params.id);
+      if (!document) {
+        return res.status(404).send("Document not found");
+      }
+      // Add filename for display in edit form
+      document.filename = path.basename(document.fileUrl);
+      res.render("admin/documents/edit", { document });
+    } catch (error) {
+      res.status(500).send("Error fetching document");
+    }
+  },
   // Get all documents
   getAllDocuments: async (req, res) => {
     try {
@@ -40,7 +55,7 @@ const documentController = {
       const document = new Document({
         title: req.body.title,
         description: req.body.description,
-        fileUrl: `/download/${req.file.filename}`,
+        fileUrl: `/uploads/documents/${req.file.filename}`,
         fileType: path.extname(req.file.originalname).toLowerCase(),
       });
 
@@ -181,7 +196,7 @@ const documentController = {
 
       document.title = req.body.title;
       document.description = req.body.description;
-      document.isActive = req.body.isActive === "true";
+      document.isActive = req.body.isActive === "on";
 
       if (req.file) {
         // Delete old file
@@ -195,7 +210,7 @@ const documentController = {
         }
 
         // Update with new file
-        document.fileUrl = `/download/${req.file.filename}`;
+        document.fileUrl = `/uploads/documents/${req.file.filename}`;
         document.fileType = path.extname(req.file.originalname).toLowerCase();
       }
 

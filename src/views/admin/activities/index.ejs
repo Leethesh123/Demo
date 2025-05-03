@@ -1,132 +1,150 @@
 <%- include('../layouts/admin', { 
   title: 'Activities Management',
   style: '',
-  script: '',
+  script: '/js/admin/activities.js',
   content: `
-    <div class="container-fluid">
+    <div class="container-fluid py-4">
       <div class="row">
         <div class="col-12">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Activities Management</h3>
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <h6>Activities Management</h6>
+                <a href="/admin/activities/create" class="btn btn-primary btn-sm">
+                  <i class="fas fa-plus"></i> Add New Activity
+                </a>
+              </div>
             </div>
             <div class="card-body">
               <div id="alert-container"></div>
 
-              <form id="activitiesForm" action="/admin/activities/update" method="POST" enctype="multipart/form-data">
-                <!-- Main Content Section -->
-                <div class="card mb-4">
-                  <div class="card-header">
-                    <h4>Main Content</h4>
-                  </div>
-                  <div class="card-body">
+              <!-- Activity Form -->
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h4 id="formTitle">Add New Activity</h4>
+                </div>
+                <div class="card-body">
+                  <form id="activityForm" action="/admin/activities" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="_id" id="activityId">
                     <div class="row">
                       <div class="col-md-6">
                         <div class="mb-3">
-                          <label class="form-label">Page Title</label>
-                          <input type="text" class="form-control" name="title" value="${title || ''}" required>
+                          <label class="form-label">Title</label>
+                          <input type="text" class="form-control" name="title" id="title" required>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Category</label>
+                          <select class="form-control" name="category" id="category" required>
+                            <option value="">Select a category</option>
+                            <option value="academic">Academic</option>
+                            <option value="sports">Sports</option>
+                            <option value="cultural">Cultural</option>
+                            <option value="social">Social</option>
+                            <option value="other">Other</option>
+                          </select>
                         </div>
                         <div class="mb-3">
                           <label class="form-label">Description</label>
-                          <textarea class="form-control" name="description" rows="5" required>${description || ''}</textarea>
+                          <textarea class="form-control" name="description" id="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Image</label>
+                          <input type="file" class="form-control" name="image" id="image" accept="image/*">
+                          <small class="text-muted">Recommended size: 800x600px. Max file size: 2MB</small>
+                          <div id="imagePreview" class="mt-2"></div>
                         </div>
                       </div>
                       <div class="col-md-6">
                         <div class="mb-3">
-                          <label class="form-label">Upload New Image</label>
-                          <input type="file" class="form-control" name="image" accept="image/*">
-                          <small class="text-muted">Recommended size: 1200x800px. Max file size: 2MB</small>
+                          <label class="form-label">Schedule</label>
+                          <input type="text" class="form-control" name="schedule" id="schedule" required>
                         </div>
                         <div class="mb-3">
-                          <label class="form-label">Current Image</label>
-                          <div class="current-image-container">
-                            ${image ? `
-                              <img src="${image}" alt="Current Activities Image" class="img-fluid rounded" style="max-height: 200px;">
-                              <div class="mt-2">
-                                <a href="${image}" target="_blank" class="btn btn-sm btn-info">
-                                  <i class="fas fa-eye me-1"></i>View Full Image
-                                </a>
-                              </div>
-                            ` : `
-                              <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>No image uploaded yet
-                              </div>
-                            `}
-                          </div>
+                          <label class="form-label">Location</label>
+                          <input type="text" class="form-control" name="location" id="location" required>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Participants</label>
+                          <input type="text" class="form-control" name="participants" id="participants" required>
                         </div>
                       </div>
-    </div>
-    </div>
-  </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                      <button type="button" class="btn btn-secondary me-2" onclick="resetForm()">Cancel</button>
+                      <button type="submit" class="btn btn-primary">Save Activity</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
 
-                <!-- Activities Section -->
-                <div class="card mb-4">
-                  <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>Activities</h4>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="addActivity()">
-                      <i class="fas fa-plus me-1"></i>Add Activity
-                    </button>
-        </div>
-                  <div class="card-body">
-                    <div id="activities-container">
-                      ${activities && activities.length > 0 ? activities.map((activity, index) => `
-                        <div class="activity-item card mb-3">
-                          <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                              <h5 class="card-title">Activity ${index + 1}</h5>
-                              <button type="button" class="btn btn-danger btn-sm remove-activity" data-index="${index}">
-                                <i class="fas fa-trash"></i>
-                              </button>
-            </div>
-                            <div class="row">
-                              <div class="col-md-6">
-            <div class="mb-3">
-                                  <label class="form-label">Activity Title</label>
-                                  <input type="text" class="form-control" name="activities[${index}][title]" value="${activity.title || ''}" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Description</label>
-                                  <textarea class="form-control" name="activities[${index}][description]" rows="3" required>${activity.description || ''}</textarea>
-                                </div>
-            </div>
-                              <div class="col-md-6">
-            <div class="mb-3">
-              <label class="form-label">Schedule</label>
-                                  <input type="text" class="form-control" name="activities[${index}][schedule]" value="${activity.schedule || ''}" required>
-            </div>
-            <div class="mb-3">
-                                  <label class="form-label">Location</label>
-                                  <input type="text" class="form-control" name="activities[${index}][location]" value="${activity.location || ''}" required>
-            </div>
-            <div class="mb-3">
-                                  <label class="form-label">Participants</label>
-                                  <input type="text" class="form-control" name="activities[${index}][participants]" value="${activity.participants || ''}" required>
+              <!-- Activities List -->
+              <div class="card">
+                <div class="card-header">
+                  <h4>Activities List</h4>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table align-items-center mb-0">
+                      <thead>
+                        <tr>
+                          <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 30%">Activity</th>
+                          <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2" style="width: 15%">Category</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 15%">Schedule</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 15%">Location</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 10%">Status</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 15%">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${activities && activities.length > 0 ? activities.map(activity => `
+                          <tr>
+                            <td>
+                              <div class="d-flex px-2 py-1">
+                                ${activity.image ? `
+                                  <div class="me-3">
+                                    <img src="${activity.image}" class="avatar avatar-sm rounded" alt="${activity.title}" style="width: 40px; height: 40px; object-fit: cover;">
+                                  </div>
+                                ` : ''}
+                                <div class="d-flex flex-column justify-content-center">
+                                  <h6 class="mb-0 text-sm">${activity.title}</h6>
+                                  <p class="text-xs text-secondary mb-0" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${activity.description}</p>
                                 </div>
                               </div>
-                            </div>
-                          </div>
-                        </div>
-                      `).join('') : ''}
-                    </div>
+                            </td>
+                            <td>
+                              <p class="text-xs font-weight-bold mb-0">${activity.category}</p>
+                            </td>
+                            <td class="align-middle text-center text-sm">
+                              <p class="text-xs font-weight-bold mb-0">${activity.schedule}</p>
+                            </td>
+                            <td class="align-middle text-center">
+                              <p class="text-xs font-weight-bold mb-0">${activity.location}</p>
+                            </td>
+                            <td class="align-middle text-center text-sm">
+                              <span class="badge badge-sm bg-gradient-${activity.isActive ? 'success' : 'secondary'}">
+                                ${activity.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                            <td class="align-middle text-center">
+                              <button onclick="editActivity('${activity._id}')" class="btn btn-link text-primary px-2 mb-0">
+                                <i class="fas fa-pencil-alt text-primary me-1"></i>Edit
+                              </button>
+                              <button onclick="deleteActivity('${activity._id}')" class="btn btn-link text-danger px-2 mb-0">
+                                <i class="far fa-trash-alt text-danger me-1"></i>Delete
+                              </button>
+                            </td>
+                          </tr>
+                        `).join('') : `
+                          <tr>
+                            <td colspan="6" class="text-center">No activities found</td>
+                          </tr>
+                        `}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-
-                <!-- Save Button -->
-                <div class="row mt-4">
-                  <div class="col-12">
-                    <div class="card">
-                      <div class="card-body">
-                        <div class="d-flex justify-content-end">
-                          <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Save Changes
-                          </button>
-                        </div>
-                      </div>
+              </div>
             </div>
-            </div>
-            </div>
-          </form>
-        </div>
           </div>
         </div>
       </div>
@@ -134,252 +152,3 @@
   `
 }) %>
 
-  <script>
-// Image preview functionality
-document.querySelector('input[type="file"]').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    // Check file size
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Image file size should be less than 2MB');
-      e.target.value = '';
-      return;
-    }
-
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload a valid image file (JPG, PNG, GIF)');
-      e.target.value = '';
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const currentImageContainer = document.querySelector('.current-image-container');
-      currentImageContainer.innerHTML = '<img src="' + e.target.result + '" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">' +
-        '<div class="mt-2">' +
-          '<small class="text-muted">New image preview</small>' +
-        '</div>';
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-// Update the image display when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-  const currentImage = document.querySelector('.current-image-container img');
-  if (currentImage) {
-    currentImage.onerror = function() {
-      this.parentElement.innerHTML = '<div class="alert alert-warning">' +
-        '<i class="fas fa-exclamation-triangle me-2"></i>Image not found' +
-      '</div>';
-    };
-  }
-});
-
-// Activity management functions
-function addActivity() {
-  const container = document.getElementById('activities-container');
-  const index = container.children.length;
-  
-  const activityHtml = '<div class="activity-item card mb-3">' +
-    '<div class="card-body">' +
-      '<div class="d-flex justify-content-between align-items-center mb-3">' +
-        '<h5 class="card-title">Activity ' + (index + 1) + '</h5>' +
-        '<button type="button" class="btn btn-danger btn-sm remove-activity" data-index="' + index + '">' +
-          '<i class="fas fa-trash"></i>' +
-        '</button>' +
-      '</div>' +
-      '<div class="row">' +
-        '<div class="col-md-6">' +
-          '<div class="mb-3">' +
-            '<label class="form-label">Activity Title</label>' +
-            '<input type="text" class="form-control" name="activities[' + index + '][title]" required>' +
-          '</div>' +
-          '<div class="mb-3">' +
-            '<label class="form-label">Description</label>' +
-            '<textarea class="form-control" name="activities[' + index + '][description]" rows="3" required></textarea>' +
-          '</div>' +
-        '</div>' +
-        '<div class="col-md-6">' +
-          '<div class="mb-3">' +
-            '<label class="form-label">Schedule</label>' +
-            '<input type="text" class="form-control" name="activities[' + index + '][schedule]" required>' +
-          '</div>' +
-          '<div class="mb-3">' +
-            '<label class="form-label">Location</label>' +
-            '<input type="text" class="form-control" name="activities[' + index + '][location]" required>' +
-          '</div>' +
-          '<div class="mb-3">' +
-            '<label class="form-label">Participants</label>' +
-            '<input type="text" class="form-control" name="activities[' + index + '][participants]" required>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
-  
-  container.insertAdjacentHTML('beforeend', activityHtml);
-}
-
-function removeActivity(index) {
-  const container = document.getElementById('activities-container');
-  const activity = container.children[index];
-  if (activity) {
-    activity.remove();
-    // Update indices for remaining activities
-    const activities = container.getElementsByClassName('activity-item');
-    for (let i = 0; i < activities.length; i++) {
-      activities[i].querySelector('.card-title').textContent = 'Activity ' + (i + 1);
-      const inputs = activities[i].querySelectorAll('input, textarea');
-      inputs.forEach(input => {
-        const name = input.getAttribute('name');
-        input.setAttribute('name', name.replace(/\[\d+\]/, '[' + i + ']'));
-      });
-    }
-  }
-}
-
-// Form submission handler
-document.getElementById('activitiesForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const formData = new FormData(e.target);
-  const alertContainer = document.getElementById('alert-container');
-  
-  try {
-    // Collect activities data
-    const activities = [];
-    const activityItems = document.querySelectorAll('.activity-item');
-    
-    activityItems.forEach((item, index) => {
-      const title = item.querySelector('[name$="[title]"]')?.value || '';
-      const description = item.querySelector('[name$="[description]"]')?.value || '';
-      const schedule = item.querySelector('[name$="[schedule]"]')?.value || '';
-      const location = item.querySelector('[name$="[location]"]')?.value || '';
-      const participants = item.querySelector('[name$="[participants]"]')?.value || '';
-      
-      if (title || description || schedule || location || participants) {
-        activities.push({
-          title,
-          description,
-          schedule,
-          location,
-          participants
-        });
-      }
-    });
-    
-    // Add activities data to formData
-    formData.append('activities', JSON.stringify(activities));
-    
-    // Show loading state
-    const submitButton = e.target.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton.innerHTML;
-    submitButton.disabled = true;
-    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-    
-    const response = await fetch('/admin/activities/update', {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-    
-    // Clear previous alerts
-    alertContainer.innerHTML = '';
-    
-    if (response.ok && data.success) {
-      // Show success message
-      const alert = document.createElement('div');
-      alert.className = 'alert alert-success alert-dismissible fade show';
-      alert.innerHTML = '<i class="fas fa-check-circle me-2"></i>' + data.message +
-        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-      alertContainer.appendChild(alert);
-      
-      // Update form data if provided
-      if (data.data) {
-        document.querySelector('[name="title"]').value = data.data.title;
-        document.querySelector('[name="description"]').value = data.data.description;
-        
-        // Update image preview if new image was uploaded
-        if (data.data.image) {
-          const currentImageContainer = document.querySelector('.current-image-container');
-          currentImageContainer.innerHTML = '<img src="' + data.data.image + '" alt="Activities Image" class="img-fluid rounded" style="max-height: 300px;">' +
-            '<div class="mt-2">' +
-              '<small class="text-muted">Current image</small>' +
-            '</div>';
-        }
-        
-        // Update activities if they were modified
-        if (data.data.activities && data.data.activities.length > 0) {
-          const activitiesContainer = document.getElementById('activities-container');
-          activitiesContainer.innerHTML = data.data.activities.map((activity, index) => {
-            return '<div class="activity-item card mb-3">' +
-              '<div class="card-body">' +
-                '<div class="d-flex justify-content-between align-items-center mb-3">' +
-                  '<h5 class="card-title">' + (activity.title || 'Activity ' + (index + 1)) + '</h5>' +
-                  '<button type="button" class="btn btn-danger btn-sm remove-activity" data-index="' + index + '">' +
-                    '<i class="fas fa-trash"></i>' +
-                  '</button>' +
-                '</div>' +
-                '<div class="row">' +
-                  '<div class="col-md-6">' +
-                    '<div class="mb-3">' +
-                      '<label class="form-label">Activity Title</label>' +
-                      '<input type="text" class="form-control" name="activities[' + index + '][title]" value="' + (activity.title || '') + '" required>' +
-                    '</div>' +
-                    '<div class="mb-3">' +
-                      '<label class="form-label">Description</label>' +
-                      '<textarea class="form-control" name="activities[' + index + '][description]" rows="3" required>' + (activity.description || '') + '</textarea>' +
-                    '</div>' +
-                  '</div>' +
-                  '<div class="col-md-6">' +
-                    '<div class="mb-3">' +
-                      '<label class="form-label">Schedule</label>' +
-                      '<input type="text" class="form-control" name="activities[' + index + '][schedule]" value="' + (activity.schedule || '') + '" required>' +
-                    '</div>' +
-                    '<div class="mb-3">' +
-                      '<label class="form-label">Location</label>' +
-                      '<input type="text" class="form-control" name="activities[' + index + '][location]" value="' + (activity.location || '') + '" required>' +
-                    '</div>' +
-                    '<div class="mb-3">' +
-                      '<label class="form-label">Participants</label>' +
-                      '<input type="text" class="form-control" name="activities[' + index + '][participants]" value="' + (activity.participants || '') + '" required>' +
-                    '</div>' +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          }).join('');
-        }
-      }
-      
-      // Reload the page after 2 seconds
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } else {
-      // Show error message
-      const alert = document.createElement('div');
-      alert.className = 'alert alert-danger alert-dismissible fade show';
-      alert.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + (data.message || data.error) +
-        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-      alertContainer.appendChild(alert);
-        }
-      } catch (error) {
-    console.error('Error:', error);
-    alertContainer.innerHTML = '<div class="alert alert-danger alert-dismissible fade show">' +
-      '<i class="fas fa-exclamation-circle me-2"></i>An unexpected error occurred. Please try again.' +
-      '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-    '</div>';
-      } finally {
-    // Reset button state
-    const submitButton = e.target.querySelector('button[type="submit"]');
-    submitButton.disabled = false;
-    submitButton.innerHTML = originalButtonText;
-      }
-    });
-  </script>
-
-<%- include('../layouts/admin-footer') %>

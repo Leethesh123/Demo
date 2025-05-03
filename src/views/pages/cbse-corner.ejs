@@ -26,12 +26,9 @@
   <body>
     <div class="container mt-5">
       <h2 class="text-center mb-4">CBSE Corner</h2>
-      <div
-        class="row flex-nowrap overflow-auto g-4"
-        style="padding-bottom: 1rem"
-      >
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         <% documents.forEach(function(doc) { %>
-        <div class="col-auto" style="width: 300px">
+        <div class="col">
           <a
             href="<%= doc.fileUrl %>"
             target="_blank"
@@ -89,3 +86,4 @@
     </script>
   </body>
 </html>
+<%- include('../partials/footer') %>

@@ -15,7 +15,9 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+    // Preserve original filename
+    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    cb(null, originalName);
   },
 });
 
@@ -27,7 +29,7 @@ router.get(
   "/documents/shared/:shareLink",
   documentController.getSharedDocument
 );
-router.get("/download/:filename", (req, res) => {
+router.get("/uploads/documents/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(
     __dirname,
@@ -63,19 +65,9 @@ router.get("/download/:filename", (req, res) => {
 
   const contentType = contentTypes[ext] || "application/octet-stream";
   res.setHeader("Content-Type", contentType);
-  // Set Content-Disposition to inline for browser-supported content types
-  const browserSupportedTypes = [
-    "application/pdf",
-    "text/plain",
-    "text/csv",
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-    "image/svg+xml",
-  ];
-  const disposition = browserSupportedTypes.includes(contentType)
-    ? "inline"
-    : "attachment";
+
+  // Always set Content-Disposition to inline to attempt browser rendering
+  const disposition = "inline";
   res.setHeader(
     "Content-Disposition",
     `${disposition}; filename*=UTF-8''${encodeURIComponent(filename)}`
@@ -109,6 +101,7 @@ router.get("/download/:filename", (req, res) => {
 // Admin routes
 router.get("/admin/documents", documentController.getAdminDocuments);
 router.get("/admin/documents/upload", documentController.renderUploadForm);
+router.get("/admin/documents/edit/:id", documentController.renderEditForm);
 router.post(
   "/admin/documents/upload",
   upload.single("document"),

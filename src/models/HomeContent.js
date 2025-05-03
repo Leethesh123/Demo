@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 
 const bannerSlideSchema = new mongoose.Schema({
-  imageUrl: { type: String, required: true },
+  contentType: { type: String, enum: ["image", "video"], default: "image" },
+  imageUrl: { type: String },
+  videoUrl: { type: String },
   title: { type: String, required: true },
   subtitle: { type: String },
   ctaText: { type: String },

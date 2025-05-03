@@ -24,11 +24,22 @@
       <div class="carousel-inner">
         <% homeContent.bannerSlides.forEach((slide, index) => { %>
         <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+          <% if (slide.contentType === 'video') { %>
+          <video
+            src="<%= slide.videoUrl %>"
+            class="d-block w-100"
+            autoplay
+            loop
+            muted
+            playsinline
+          ></video>
+          <% } else { %>
           <img
             src="<%= slide.imageUrl %>"
             class="d-block w-100"
             alt="<%= slide.title %>"
           />
+          <% } %>
           <div class="carousel-caption">
             <h3><%= slide.title %></h3>
             <% if (slide.subtitle) { %>

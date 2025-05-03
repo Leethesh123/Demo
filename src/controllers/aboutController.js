@@ -2,10 +2,15 @@ const About = require("../models/About");
 const path = require("path");
 const fs = require("fs");
 
+const { getTestimonialsForAboutPage } = require("./testimonialController");
+
 exports.getAboutPage = async (req, res) => {
   try {
-    const about = await About.findOne();
-    res.render("pages/about", { about });
+    const [about, testimonials] = await Promise.all([
+      About.findOne(),
+      getTestimonialsForAboutPage(),
+    ]);
+    res.render("pages/about", { about, testimonials });
   } catch (error) {
     console.error("Error fetching about content:", error);
     res.status(500).send("Error loading about page");

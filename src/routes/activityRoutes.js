@@ -6,6 +6,7 @@ const upload = require("../middleware/fileUpload");
 
 // Public routes
 router.get("/", (req, res, next) => {
+  console.log(res)
   if (req.baseUrl === "/admin/activities") {
     return activityController.renderAdminActivities(req, res, next);
   }
@@ -27,7 +28,12 @@ router.post(
   upload.single("image"),
   activityController.createActivity
 );
-router.put("/:id", auth, activityController.updateActivity);
+router.post(
+  "/update/:id",
+  auth,
+  upload.single("image"),
+  activityController.updateActivity
+);
 router.delete("/:id", auth, activityController.deleteActivity);
 
 // Admin activity management route

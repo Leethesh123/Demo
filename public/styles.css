@@ -1,0 +1,20 @@
+.navbar {
+  background-color: #0066cc !important;
+}
+
+.navbar-light .navbar-nav .nav-link {
+  color: white !important;
+}
+
+.navbar-light .navbar-toggler-icon {
+  filter: brightness(0) invert(1);
+}
+
+.navbar-light .navbar-toggler {
+  border-color: white;
+}
+
+.footer-custom {
+  background-color: #333 !important;
+  color: #fff;
+}

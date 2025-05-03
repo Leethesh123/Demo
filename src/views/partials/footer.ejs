@@ -1,29 +1,43 @@
 </main>
-<footer class="bg-light py-4 mt-5">
+<footer class="footer-custom py-4 mt-5">
   <div class="container">
     <div class="row">
       <div class="col-md-4 mb-3">
         <h5>Contact Us</h5>
-        <p class="mb-1"><i class="bi bi-geo-alt"></i> 123 School Street, City, Country</p>
-        <p class="mb-1"><i class="bi bi-telephone"></i> +1 234 567 890</p>
-        <p class="mb-1"><i class="bi bi-envelope"></i> info@schoolwebsite.com</p>
+        <% if (typeof contactInfo !== 'undefined' && contactInfo) { %>
+          <p class="mb-1"><i class="bi bi-geo-alt"></i> <%= contactInfo.address %></p>
+          <p class="mb-1"><i class="bi bi-telephone"></i> <%= contactInfo.phone %></p>
+          <p class="mb-1"><i class="bi bi-envelope"></i> <%= contactInfo.email %></p>
+        <% } else { %>
+          <p class="mb-1"><i class="bi bi-geo-alt"></i> Address will be updated soon</p>
+          <p class="mb-1"><i class="bi bi-telephone"></i> Phone will be updated soon</p>
+          <p class="mb-1"><i class="bi bi-envelope"></i> Email will be updated soon</p>
+        <% } %>
       </div>
       <div class="col-md-4 mb-3">
         <h5>Quick Links</h5>
         <ul class="list-unstyled">
-          <li><a href="/" class="text-decoration-none text-dark">Home</a></li>
-          <li><a href="/about" class="text-decoration-none text-dark">About</a></li>
-          <li><a href="/teachers" class="text-decoration-none text-dark">Teachers</a></li>
-          <li><a href="/contact" class="text-decoration-none text-dark">Contact</a></li>
+          <li><a href="/" class="text-decoration-none text-white">Home</a></li>
+          <li><a href="/about" class="text-decoration-none text-white">About</a></li>
+          <li><a href="/teachers" class="text-decoration-none text-white">Teachers</a></li>
+          <li><a href="/contact" class="text-decoration-none text-white">Contact</a></li>
         </ul>
       </div>
       <div class="col-md-4 mb-3">
         <h5>Follow Us</h5>
         <div class="d-flex gap-3">
-          <a href="#" class="text-dark"><i class="bi bi-facebook fs-5"></i></a>
-          <a href="#" class="text-dark"><i class="bi bi-twitter fs-5"></i></a>
-          <a href="#" class="text-dark"><i class="bi bi-instagram fs-5"></i></a>
-          <a href="#" class="text-dark"><i class="bi bi-linkedin fs-5"></i></a>
+          <% if (contactInfo?.socialLinks?.facebook) { %>
+            <a href="<%= contactInfo.socialLinks.facebook %>" class="text-white" target="_blank"><i class="bi bi-facebook fs-5"></i></a>
+          <% } %>
+          <% if (contactInfo?.socialLinks?.twitter) { %>
+            <a href="<%= contactInfo.socialLinks.twitter %>" class="text-white" target="_blank"><i class="bi bi-twitter fs-5"></i></a>
+          <% } %>
+          <% if (contactInfo?.socialLinks?.instagram) { %>
+            <a href="<%= contactInfo.socialLinks.instagram %>" class="text-white" target="_blank"><i class="bi bi-instagram fs-5"></i></a>
+          <% } %>
+          <% if (contactInfo?.socialLinks?.linkedin) { %>
+            <a href="<%= contactInfo.socialLinks.linkedin %>" class="text-white" target="_blank"><i class="bi bi-linkedin fs-5"></i></a>
+          <% } %>
         </div>
       </div>
     </div>

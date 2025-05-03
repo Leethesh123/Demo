@@ -1,0 +1,41 @@
+<%- include('../../partials/header') %>
+<%- include('../../partials/navbar') %>
+
+<div class="container mt-4">
+    <h1>Logo Management</h1>
+
+    <% if (messages.success) { %>
+        <div class="alert alert-success">
+            <%= messages.success %>
+        </div>
+    <% } %>
+
+    <% if (messages.error) { %>
+        <div class="alert alert-danger">
+            <%= messages.error %>
+        </div>
+    <% } %>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="/admin/logo/update" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="logo">Upload Logo</label>
+                    <input type="file" class="form-control-file" id="logo" name="logo" accept="image/*" required>
+                    <small class="form-text text-muted">Supported formats: JPEG, JPG, PNG, GIF</small>
+                </div>
+
+                <% if (logo && logo.logoUrl) { %>
+                    <div class="mt-3 mb-3">
+                        <h5>Current Logo:</h5>
+                        <img src="<%= logo.logoUrl %>" alt="Current Logo" style="max-width: 200px;">
+                    </div>
+                <% } %>
+
+                <button type="submit" class="btn btn-primary">Update Logo</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../../partials/footer') %> 

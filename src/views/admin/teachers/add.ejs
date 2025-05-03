@@ -1,6 +1,5 @@
 <%- include('../layouts/admin', { title: 'Add Teacher', style: '', script: '',
 content: `
-
 <div class="container mt-4">
   <h2>Add New Teacher</h2>
   <form
@@ -11,9 +10,9 @@ content: `
     novalidate
   >
     <div class="row">
-      <% if (typeof error !== 'undefined') { %>
-      <div class="alert alert-danger" role="alert"><%= error %></div>
-      <% } %>
+      ${typeof error !== 'undefined' ? `
+      <div class="alert alert-danger" role="alert">${error}</div>
+      ` : ''}
       <div class="col-md-6 mb-3">
         <label for="firstName" class="form-label">First Name</label>
         <input
@@ -21,7 +20,7 @@ content: `
           class="form-control"
           id="firstName"
           name="firstName"
-          value="<%= typeof formData !== 'undefined' ? formData.firstName : '' %>"
+          value="${typeof formData !== 'undefined' ? formData.firstName : ''}"
           required
         />
       </div>
@@ -32,7 +31,7 @@ content: `
           class="form-control"
           id="lastName"
           name="lastName"
-          value="<%= typeof formData !== 'undefined' ? formData.lastName : '' %>"
+          value="${typeof formData !== 'undefined' ? formData.lastName : ''}"
           required
         />
       </div>
@@ -46,23 +45,31 @@ content: `
           class="form-control"
           id="email"
           name="email"
+          value="${typeof formData !== 'undefined' ? formData.email : ''}"
           required
         />
       </div>
       <div class="col-md-6 mb-3">
         <label for="phone" class="form-label">Phone</label>
-        <input type="tel" class="form-control" id="phone" name="phone" />
+        <input
+          type="tel"
+          class="form-control"
+          id="phone"
+          name="phone"
+          value="${typeof formData !== 'undefined' ? formData.phone : ''}"
+        />
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-6 mb-3">
-        <label for="qualifications" class="form-label">Qualifications</label>
+        <label for="qualification" class="form-label">Qualification</label>
         <input
           type="text"
           class="form-control"
-          id="qualifications"
-          name="qualifications"
+          id="qualification"
+          name="qualification"
+          value="${typeof formData !== 'undefined' ? formData.qualification : ''}"
           required
         />
       </div>
@@ -73,6 +80,7 @@ content: `
           class="form-control"
           id="experience"
           name="experience"
+          value="${typeof formData !== 'undefined' ? formData.experience : ''}"
           required
         />
       </div>
@@ -85,18 +93,15 @@ content: `
         class="form-control"
         id="specialization"
         name="specialization"
+        value="${typeof formData !== 'undefined' ? formData.specialization : ''}"
       />
     </div>
 
     <div class="mb-3">
       <label for="bio" class="form-label">Biography</label>
-      <textarea
-        class="form-control"
-        id="bio"
-        name="bio"
-        rows="3"
-        required
-      ></textarea>
+      <textarea class="form-control" id="bio" name="bio" rows="3" required>
+${typeof formData !== 'undefined' ? formData.bio : ''}</textarea
+      >
     </div>
 
     <div class="mb-3">
@@ -108,7 +113,9 @@ content: `
         id="achievements"
         name="achievements"
         rows="3"
-      ></textarea>
+      >
+${typeof formData !== 'undefined' && formData.achievements ? formData.achievements.join('\n') : ''}</textarea
+      >
     </div>
 
     <div class="mb-3">
@@ -120,6 +127,7 @@ content: `
         name="image"
         accept="image/*"
         onchange="previewImage(this)"
+        required
       />
       <div class="mt-2">
         <img
@@ -132,24 +140,26 @@ content: `
       </div>
     </div>
 
+    <script>
+      function previewImage(input) {
+        const preview = document.getElementById("imagePreview");
+        if (input.files && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+          };
+          reader.readAsDataURL(input.files[0]);
+        }
+      }
+    </script>
+
     <button type="submit" class="btn btn-primary">Add Teacher</button>
     <a href="/admin/teachers" class="btn btn-secondary">Cancel</a>
   </form>
 </div>
 
 <script>
-  function previewImage(input) {
-    const preview = document.getElementById("imagePreview");
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        preview.src = e.target.result;
-        preview.style.display = "block";
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-
   // Form validation
   document
     .querySelector(".needs-validation")
@@ -161,5 +171,4 @@ content: `
       this.classList.add("was-validated");
     });
 </script>
-
 `}) %>

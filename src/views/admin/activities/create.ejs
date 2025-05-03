@@ -1,0 +1,257 @@
+<%- include('../../partials/admin/header') %>
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h6>Create New Activity</h6>
+        </div>
+        <div class="card-body">
+          <form
+            action="/admin/activities"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="title" class="form-control-label">Title*</label>
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="title"
+                    name="title"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="category" class="form-control-label"
+                    >Category*</label
+                  >
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="category"
+                    name="category"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="description" class="form-control-label"
+                >Description*</label
+              >
+              <textarea
+                class="form-control"
+                id="description"
+                name="description"
+                rows="3"
+                required
+              ></textarea>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="schedule" class="form-control-label"
+                    >Schedule*</label
+                  >
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="schedule"
+                    name="schedule"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="location" class="form-control-label"
+                    >Location*</label
+                  >
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="location"
+                    name="location"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="participants" class="form-control-label"
+                    >Participants*</label
+                  >
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="participants"
+                    name="participants"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="maxParticipants" class="form-control-label"
+                    >Max Participants</label
+                  >
+                  <input
+                    class="form-control"
+                    type="number"
+                    id="maxParticipants"
+                    name="maxParticipants"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="instructor" class="form-control-label"
+                    >Instructor</label
+                  >
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="instructor"
+                    name="instructor"
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="image" class="form-control-label">Image</label>
+                  <input
+                    class="form-control"
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Sub-activities Section -->
+            <div class="mt-4">
+              <h6>Sub-activities</h6>
+              <div id="subActivities">
+                <!-- Sub-activity template will be added here -->
+              </div>
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm mt-2"
+                onclick="addSubActivity()"
+              >
+                Add Sub-activity
+              </button>
+            </div>
+
+            <div class="mt-4">
+              <button type="submit" class="btn btn-primary">
+                Create Activity
+              </button>
+              <a href="/admin/activities" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sub-activity Template -->
+<template id="subActivityTemplate">
+  <div class="sub-activity border rounded p-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="mb-0">Sub-activity</h6>
+      <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        onclick="removeSubActivity(this)"
+      >
+        Remove
+      </button>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-control-label">Title*</label>
+          <input
+            class="form-control"
+            type="text"
+            name="activities[][title]"
+            required
+          />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-control-label">Schedule*</label>
+          <input
+            class="form-control"
+            type="text"
+            name="activities[][schedule]"
+            required
+          />
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-control-label">Description*</label>
+      <textarea
+        class="form-control"
+        name="activities[][description]"
+        rows="2"
+        required
+      ></textarea>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-control-label">Location*</label>
+          <input
+            class="form-control"
+            type="text"
+            name="activities[][location]"
+            required
+          />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-control-label">Participants*</label>
+          <input
+            class="form-control"
+            type="text"
+            name="activities[][participants]"
+            required
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  function addSubActivity() {
+    const template = document.getElementById("subActivityTemplate");
+    const subActivitiesContainer = document.getElementById("subActivities");
+    const clone = template.content.cloneNode(true);
+    subActivitiesContainer.appendChild(clone);
+  }
+
+  function removeSubActivity(button) {
+    button.closest(".sub-activity").remove();
+  }
+</script>
+
+<%- include('../../partials/admin/footer') %>

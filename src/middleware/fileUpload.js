@@ -1,10 +1,15 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 // Configure storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "public/uploads/");
+    const uploadDir = path.join(__dirname, "..", "..", "public", "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -17,10 +22,28 @@ const storage = multer.diskStorage({
 
 // File filter
 const fileFilter = (req, file, cb) => {
-  // Accept images only
-  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-    req.fileValidationError = "Only image files are allowed!";
-    return cb(new Error("Only image files are allowed!"), false);
+  // Accept image and video files
+  const allowedImageTypes = /\.(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/;
+  const allowedVideoTypes = /\.(mp4|webm|MP4|WEBM)$/;
+
+  // Check if the field is for banner slides, about image, or other image uploads
+  if (file.fieldname.includes("bannerSlides") || file.fieldname === "image") {
+    if (!file.originalname.match(allowedImageTypes)) {
+      const errorMsg = "Only JPG, PNG and GIF image files are allowed!";
+      req.fileValidationError = errorMsg;
+      return cb(null, false);
+    }
+  } else if (file.fieldname.includes("video")) {
+    if (!file.originalname.match(allowedVideoTypes)) {
+      const errorMsg = "Only MP4 and WebM video files are allowed!";
+      req.fileValidationError = errorMsg;
+      return cb(null, false);
+    }
+  } else {
+    if (!file.originalname.match(allowedImageTypes)) {
+      req.fileValidationError = "Only JPG, PNG and GIF files are allowed!";
+      return cb(new Error("Only JPG, PNG and GIF files are allowed!"), false);
+    }
   }
   cb(null, true);
 };
@@ -30,8 +53,21 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB max file size
+    fileSize: 10 * 1024 * 1024, // 10MB max file size for images and videos
+  },
+  onError: function (err, req, next) {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        req.fileValidationError =
+          "File size is too large. Maximum size is 10MB.";
+      } else {
+        req.fileValidationError = "File upload error: " + err.message;
+      }
+      return next(null);
+    }
+    next(err);
   },
 });
 
+// Export the configured multer instance
 module.exports = upload;

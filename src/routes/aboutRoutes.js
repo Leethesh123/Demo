@@ -1,17 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
 const aboutController = require("../controllers/aboutController");
-
-// Multer setup for image uploads
-const storage = multer.diskStorage({
-  destination: "public/uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage });
+const upload = require("../middleware/fileUpload");
 
 // Public route for viewing about page
 router.get("/", aboutController.getAboutPage);
@@ -19,7 +10,7 @@ router.get("/", aboutController.getAboutPage);
 // Admin routes for managing about content
 router.get("/admin/about/edit", aboutController.getAdminAboutEdit);
 router.post(
-  "/admin/about/edit",
+  "/admin/about/update",
   upload.single("image"),
   aboutController.updateAboutContent
 );

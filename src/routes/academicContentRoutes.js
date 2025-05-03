@@ -32,6 +32,7 @@ router.get("/", async (req, res) => {
 router.get("/admin/academics", async (req, res) => {
   try {
     const academics = await Academic.find();
+    console.log(academics);
     res.render("admin/academics/index", { content: academics });
   } catch (error) {
     res.status(500).json({ error: "Error fetching academic content" });

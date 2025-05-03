@@ -9,6 +9,8 @@ const activities = [
       "Join our competitive basketball team! We focus on developing fundamental skills, teamwork, and strategy through regular practice sessions and friendly matches.",
     category: "Sports",
     schedule: "Monday and Wednesday, 4:00 PM - 6:00 PM",
+    location: "School Gymnasium",
+    participants: "Students in grades 9-12",
     instructor: "Coach Mike Johnson",
     maxParticipants: 15,
     image:
@@ -21,6 +23,8 @@ const activities = [
       "Explore the wonders of science through hands-on experiments, research projects, and fascinating discussions about various scientific topics.",
     category: "Academic",
     schedule: "Tuesday, 3:30 PM - 5:00 PM",
+    location: "Science Lab 101",
+    participants: "Students in grades 10-12",
     instructor: "Dr. Sarah Williams",
     maxParticipants: 20,
     image:
@@ -33,6 +37,8 @@ const activities = [
       "Express your creativity through various art forms including painting, drawing, and sculpture. Perfect for both beginners and experienced artists.",
     category: "Arts",
     schedule: "Thursday, 4:00 PM - 5:30 PM",
+    location: "Art Room 203",
+    participants: "All students",
     instructor: "Ms. Emily Chen",
     maxParticipants: 12,
     image:
@@ -45,6 +51,8 @@ const activities = [
       "Develop critical thinking and public speaking skills through engaging debates on current events and various topics.",
     category: "Academic",
     schedule: "Friday, 3:30 PM - 5:00 PM",
+    location: "Room 305",
+    participants: "Students in grades 9-12",
     instructor: "Mr. James Wilson",
     maxParticipants: 16,
     image:
@@ -57,6 +65,8 @@ const activities = [
       "Learn strategic thinking and problem-solving skills through the game of chess. All skill levels welcome!",
     category: "Games",
     schedule: "Wednesday, 3:30 PM - 5:00 PM",
+    location: "Library",
+    participants: "All students",
     instructor: "Mr. Robert Lee",
     maxParticipants: 20,
     image:

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logo Management</title>
+    <link rel="stylesheet" href="/css/admin.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Logo Management</h1>
+      <% if (typeof error !== 'undefined') { %>
+      <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+
+      <div class="logo-preview">
+        <h2>Current Logo</h2>
+        <% if (logo && logo.logoUrl) { %>
+        <img
+          src="<%= logo.logoUrl %>"
+          alt="Current Logo"
+          style="max-width: 200px"
+        />
+        <% } else { %>
+        <p>No logo currently set</p>
+        <% } %>
+      </div>
+
+      <div class="logo-upload-form">
+        <h2>Update Logo</h2>
+        <form
+          action="/admin/logo/update"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <div class="form-group">
+            <label for="logo">Select New Logo:</label>
+            <input
+              type="file"
+              id="logo"
+              name="logo"
+              accept="image/*"
+              required
+            />
+            <small class="form-text text-muted"
+              >Supported formats: JPEG, JPG, PNG, GIF</small
+            >
+          </div>
+          <button type="submit" class="btn btn-primary">Update Logo</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

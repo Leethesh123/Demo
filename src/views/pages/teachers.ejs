@@ -18,13 +18,16 @@
         </div>
         <% } %>
         <div class="card-body">
-          <h5 class="card-title"><%= teacher.name %></h5>
+          <h5 class="card-title">
+            <strong>Name:</strong> <%= teacher.firstName %>&nbsp;<%=
+            teacher.lastName %>
+          </h5>
           <h6 class="card-subtitle mb-2 text-muted"><%= teacher.subject %></h6>
           <p class="card-text"><%= teacher.bio %></p>
 
           <div class="mt-3">
             <p class="mb-2">
-              <strong>Qualifications:</strong> <%= teacher.qualifications %>
+              <strong>Qualifications:</strong> <%= teacher.qualification %>
             </p>
             <p class="mb-2">
               <strong>Experience:</strong> <%= teacher.experience %>
